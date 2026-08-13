@@ -1525,25 +1525,34 @@ You can join my WiFi hotspot if you cannot access Google:
 #| cache: TRUE
 library(httr)
 library(purrr)
-unsplash_pattern <- ".*-(.{11})-unsplash\\.jpg.*"
+unsplash_pattern <- "([A-Za-z0-9_-]{11})-unsplash\\.jpg"
 slides <- readLines("index.qmd")
-backgrounds <- slides[grepl("../backgrounds/.+?unsplash.jpg", slides)]
-images <- unique(sub(".*\\(backgrounds/(.+?)\\).*", "\\1", backgrounds))
-images <- images[grepl(unsplash_pattern, images)]
-ids <- sub(unsplash_pattern, "\\1", images)
+matches <- regmatches(slides, regexpr("backgrounds/[^)]+unsplash\\.jpg", slides))
+images <- unique(basename(matches))
+ids <- unique(sub(paste0(".*", unsplash_pattern), "\\1", images))
 
 get_unsplash_credit <- function(id) {
-  unsplash_url <- "https://api.unsplash.com/" 
-  my_response <- httr::GET(unsplash_url, path = c("photos", id), query = list(client_id=Sys.getenv("UNSPLASH_ACCESS")))
+  fallback <- sprintf("* [Photo](https://unsplash.com/photos/%s)", id)
+  my_response <- tryCatch(
+    httr::GET(
+      "https://api.unsplash.com/",
+      path = c("photos", id),
+      query = list(client_id = Sys.getenv("UNSPLASH_ACCESS"))
+    ),
+    error = function(e) NULL
+  )
+  if (is.null(my_response) || httr::http_error(my_response)) return(fallback)
+
   xml <- content(my_response)
-  
   name <- xml$user$name
+  if (is.null(name)) return(fallback)
   desc <- xml$description%||%"Photo"
+  width <- max(0, 60 - nchar(name))
   sprintf(
     "* %s: [%s%s](%s)",
     name,
-    strtrim(desc,60-nchar(name)),
-    if(nchar(desc)>(60-nchar(name))) "..." else "",
+    strtrim(desc, width),
+    if(nchar(desc) > width) "..." else "",
     modify_url("https://unsplash.com/", path = file.path("photos", xml$id))
   )
 }
