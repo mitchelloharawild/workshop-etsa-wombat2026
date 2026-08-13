@@ -20,7 +20,7 @@ editor_options:
 ```{r}
 #| include: false
 library(fpp3)
-aus_accommodation_total <- fpp3::aus_accommodation |> 
+aus_accommodation_total <- fpp3::aus_accommodation |>
   summarise(Takings = sum(Takings), Occupancy = mean(Occupancy))
 ```
 
@@ -105,7 +105,7 @@ Creating a time plot with `autoplot()` is quick and easy. A time plot can also b
 
 ```{r}
 #| echo: true
-pbs_scripts |> 
+pbs_scripts |>
   ggplot(aes(x = Month, y = Scripts)) +
   geom_line()
 ```
@@ -164,7 +164,7 @@ Try adjusting the following code to plot *month of year* along the x-axis.
 ```{r}
 #| echo: true
 #| eval: false
-pbs_scripts |> 
+pbs_scripts |>
   ggplot(aes(x = Month, y = Scripts)) +
   geom_line()
 ```
@@ -192,13 +192,14 @@ Hint: `lubridate::month()` and `lubridate::year()` are useful tools for extracti
 
 ```{r}
 #| echo: true
-pbs_scripts |> 
+pbs_scripts |>
   ggplot(aes(
     x = month(Month, label = TRUE),
-    y = Scripts, group = year(Month)
+    y = Scripts,
+    group = year(Month)
   )) +
-  geom_line() + 
-  labs("Month of Year")
+  geom_line() +
+  labs(x = "Month of Year")
 ```
 
 :::
@@ -219,13 +220,14 @@ pbs_scripts |>
 ### Visualising seasonality
 
 ```{r}
-pbs_scripts |> 
+pbs_scripts |>
   ggplot(aes(
     x = month(Month, label = TRUE),
-    y = Scripts, group = year(Month)
+    y = Scripts,
+    group = year(Month)
   )) +
-  geom_line() + 
-  labs("Month of Year")
+  geom_line() +
+  labs(x = "Month of Year")
 ```
 
 ::: callout-caution
@@ -255,7 +257,7 @@ When are the most scripts (the peak) and the least scripts (the trough) issued?
 
 ```{r}
 #| echo: true
-pbs_scripts |> 
+pbs_scripts |>
   gg_season(Scripts, period = "1 year")
 ```
 
@@ -280,7 +282,7 @@ This plot is known as a **season plot**, which can be made quickly with the plot
 ```{r}
 #| echo: true
 #| eval: false
-pbs_scripts |> 
+pbs_scripts |>
   gg_season(Scripts, period = "1 year")
 ```
 
@@ -313,7 +315,7 @@ The `aus_production` dataset contains the production of Australian Gas in petajo
 
 ```{r}
 #| echo: true
-aus_production |> 
+aus_production |>
   autoplot(Gas)
 ```
 
@@ -342,7 +344,7 @@ Plot the shape of the seasonal pattern, in which quarter does Australia produce 
 
 ```{r}
 #| echo: true
-aus_production |> 
+aus_production |>
   gg_season(Gas, period = "1 year")
 ```
 
@@ -378,7 +380,7 @@ It's hard to see the seasonality from the early data, how can we improve it?
 ::: {.fragment .fade-out fragment-index=1}
 ```{r}
 #| echo: true
-aus_production |> 
+aus_production |>
   gg_season(log(Gas), period = "1 year")
 ```
 :::
@@ -386,8 +388,8 @@ aus_production |>
 ::: {.fragment .fade-up fragment-index=1}
 ```{r}
 #| echo: true
-aus_production |> 
-  gg_season(Gas, period = "1 year") + 
+aus_production |>
+  gg_season(Gas, period = "1 year") +
   scale_y_log10()
 ```
 
@@ -427,9 +429,9 @@ The trend makes it difficult to compare across and within seasons, can we remove
 ```{r}
 #| echo: true
 #| fig-height: 4.5
-aus_production |> 
-  model(STL(log(Gas))) |> 
-  components() |> 
+aus_production |>
+  model(STL(log(Gas))) |>
+  components() |>
   autoplot()
 ```
 
@@ -444,9 +446,9 @@ Recall that STL allows us to separate trend from seasonality, let's plot only th
 ```{r}
 #| echo: true
 #| fig-height: 4.5
-aus_production |> 
-  model(STL(log(Gas))) |> 
-  components() |> 
+aus_production |>
+  model(STL(log(Gas))) |>
+  components() |>
   gg_season(season_year, period = "1 year")
 ```
 
@@ -492,13 +494,21 @@ Swap the x and colour aesthetic mappings to plot the years on the x-axis, with c
 ```{r}
 #| echo: true
 #| code-fold: show
-aus_production |> 
-  model(STL(log(Gas))) |> 
-  components() |> 
-  ggplot(aes(x = year(Quarter), y = season_year, 
-             colour = paste0("Q", quarter(Quarter)))) + 
-  geom_line() + 
-  labs(x = "Time", y = "Seasonality", colour = "Quarter", title = "Gas production in Australia")
+aus_production |>
+  model(STL(log(Gas))) |>
+  components() |>
+  ggplot(aes(
+    x = year(Quarter),
+    y = season_year,
+    colour = paste0("Q", quarter(Quarter))
+  )) +
+  geom_line() +
+  labs(
+    x = "Time",
+    y = "Seasonality",
+    colour = "Quarter",
+    title = "Gas production in Australia"
+  )
 ```
 
 
@@ -532,13 +542,21 @@ Swap the x and colour aesthetic mappings to plot the years on the x-axis, with c
 ```{r}
 #| echo: true
 #| code-fold: show
-aus_production |> 
-  model(STL(log(Gas))) |> 
-  components() |> 
-  ggplot(aes(x = year(Quarter), y = season_year, 
-             colour = paste0("Q", quarter(Quarter)))) + 
-  geom_line() + 
-  labs(x = "Time", y = "Seasonality", colour = "Quarter", title = "Gas production in Australia")
+aus_production |>
+  model(STL(log(Gas))) |>
+  components() |>
+  ggplot(aes(
+    x = year(Quarter),
+    y = season_year,
+    colour = paste0("Q", quarter(Quarter))
+  )) +
+  geom_line() +
+  labs(
+    x = "Time",
+    y = "Seasonality",
+    colour = "Quarter",
+    title = "Gas production in Australia"
+  )
 ```
 
 
@@ -570,11 +588,11 @@ This produces a 'seasonal sub-series plot', which is useful for visualising chan
 ```{r}
 #| echo: true
 #| code-fold: show
-aus_production |> 
-  model(STL(log(Gas))) |> 
-  components() |> 
-  ggplot(aes(x = year(Quarter), y = season_year)) + 
-  geom_line() + 
+aus_production |>
+  model(STL(log(Gas))) |>
+  components() |>
+  ggplot(aes(x = year(Quarter), y = season_year)) +
+  geom_line() +
   facet_grid(cols = vars(paste0("Q", quarter(Quarter)))) +
   labs(x = "Time", y = "Seasonality", title = "Gas production in Australia")
 ```
@@ -597,7 +615,7 @@ aus_production |>
 
 ```{r}
 #| echo: true
-aus_production |> 
+aus_production |>
   gg_subseries(Gas, period = "1 year")
 ```
 
@@ -628,9 +646,9 @@ Seeing changes in seasonality when the data has trend, noise, and other patterns
 ```{r}
 #| echo: true
 #| fig-height: 4.5
-aus_production |> 
-  model(STL(log(Gas))) |> 
-  components() |> 
+aus_production |>
+  model(STL(log(Gas))) |>
+  components() |>
   gg_subseries(season_year, period = "1 year")
 ```
 
@@ -686,9 +704,9 @@ pbs_scripts |>
 ```{r}
 #| echo: true
 #| fig-height: 5
-pbs_scripts |> 
-  model(STL(Scripts)) |> 
-  components() |> 
+pbs_scripts |>
+  model(STL(Scripts)) |>
+  components() |>
   gg_subseries(season_year, period = "1 year")
 ```
 
@@ -858,7 +876,7 @@ When plotted at a 30 minute frequency, it is difficult to see any seasonal patte
 
 ```{r}
 #| echo: true
-vic_elec |> 
+vic_elec |>
   autoplot(Demand)
 ```
 
@@ -882,9 +900,9 @@ Aggregation to a weekly frequency will sum over the daily and weekly patterns.
 ```{r}
 #| echo: true
 #| fig-height: 4.5
-vic_elec |> 
-  index_by(Week = yearweek(Time)) |> 
-  summarise(Demand = sum(Demand)) |> 
+vic_elec |>
+  index_by(Week = yearweek(Time)) |>
+  summarise(Demand = sum(Demand)) |>
   autoplot(Demand)
 ```
 
@@ -913,10 +931,10 @@ When aggregating time, you need to ensure the aggregation window has all necessa
 #| echo: true
 #| fig-height: 4.5
 #| code-line-numbers: "3-4"
-vic_elec |> 
-  index_by(Week = yearweek(Time)) |> 
+vic_elec |>
+  index_by(Week = yearweek(Time)) |>
   summarise(Demand = sum(Demand), n = length(Week)) |>
-  filter(n >= 2*24*7 - 2) |> 
+  filter(n >= 2 * 24 * 7 - 2) |>
   autoplot(Demand)
 ```
 
@@ -936,10 +954,10 @@ vic_elec |>
 ```{r}
 #| echo: true
 #| fig-height: 4.5
-vic_elec |> 
-  index_by(Week = yearweek(Date)) |> 
+vic_elec |>
+  index_by(Week = yearweek(Date)) |>
   summarise(Demand = sum(Demand), n = length(Week)) |>
-  filter(n >= 2*24*7 - 2) |>
+  filter(n >= 2 * 24 * 7 - 2) |>
   gg_season(Demand, period = "1 year")
 ```
 
@@ -960,8 +978,8 @@ The `pedestrian` dataset contains the hourly number of pedestrians at various pl
 
 ```{r}
 #| echo: true
-pedestrian |> 
-  filter(Sensor == "Southern Cross Station") |> 
+pedestrian |>
+  filter(Sensor == "Southern Cross Station") |>
   autoplot(Count)
 ```
 
@@ -981,12 +999,12 @@ pedestrian |>
 
 ```{r}
 #| echo: true
-pedestrian |> 
-  filter(Sensor == "Southern Cross Station") |> 
+pedestrian |>
+  filter(Sensor == "Southern Cross Station") |>
   index_by(Week = yearweek(Date_Time)) |>
-  summarise(Count = sum(Count), n = length(Week)) |> 
-  filter(n >= 24*7 - 1) |> 
-  fill_gaps() |> 
+  summarise(Count = sum(Count), n = length(Week)) |>
+  filter(n >= 24 * 7 - 1) |>
+  fill_gaps() |>
   gg_season(Count, period = "1 year")
 ```
 
@@ -1040,10 +1058,10 @@ pedestrian |>
 
 ```{r}
 #| echo: true
-pedestrian |> 
-  filter(Sensor == "Southern Cross Station") |> 
+pedestrian |>
+  filter(Sensor == "Southern Cross Station") |>
   index_by(Date) |>
-  summarise(Count = sum(Count)) |> 
+  summarise(Count = sum(Count)) |>
   gg_season(Count, period = "1 week")
 ```
 
@@ -1066,11 +1084,14 @@ The STL model can also decompose multiple seasonalities.
 ```{r}
 #| echo: true
 #| fig-height: 4.5
-dcmp <- vic_elec |> 
-  model(STL(log(Demand) ~ season(period = "year") +
-              season(period = "week") + season(period = "day"))) |> 
+dcmp <- vic_elec |>
+  model(STL(
+    log(Demand) ~ season(period = "year") +
+      season(period = "week") +
+      season(period = "day")
+  )) |>
   components()
-dcmp |> 
+dcmp |>
   autoplot()
 ```
 
@@ -1091,7 +1112,7 @@ This is effective in combination with season plots to show seasonal patterns.
 
 ```{r}
 #| echo: true
-dcmp |> 
+dcmp |>
   gg_season(season_year, period = "1 year")
 ```
 
@@ -1113,7 +1134,7 @@ This is effective in combination with season plots to show seasonal patterns.
 
 ```{r}
 #| echo: true
-dcmp |> 
+dcmp |>
   gg_season(season_week, period = "1 week")
 ```
 
@@ -1135,7 +1156,7 @@ This is effective in combination with season plots to show seasonal patterns.
 
 ```{r}
 #| echo: true
-dcmp |> 
+dcmp |>
   gg_season(season_day, period = "1 day")
 ```
 
@@ -1158,9 +1179,8 @@ Specific combinations of seasonal patterns can also be computed and plotted.
 ::: {.fragment .fade-out fragment-index=1}
 ```{r}
 #| echo: true
-dcmp |> 
-  gg_season(season_day + season_week, 
-            period = "1 week")
+dcmp |>
+  gg_season(season_day + season_week, period = "1 week")
 ```
 :::
 
@@ -1192,12 +1212,12 @@ Use an STL decomposition and `gg_season()` to clearly show the seasonal patterns
 
 ```{r}
 #| echo: true
-ped_dcmp <- pedestrian |> 
-  filter(Sensor == "Southern Cross Station") |> 
-  fill_gaps(Count = 0) |> 
-  model(STL(Count)) |> 
+ped_dcmp <- pedestrian |>
+  filter(Sensor == "Southern Cross Station") |>
+  fill_gaps(Count = 0) |>
+  model(STL(Count)) |>
   components()
-ped_dcmp |> 
+ped_dcmp |>
   autoplot()
 ```
 
@@ -1219,7 +1239,7 @@ ped_dcmp |>
 
 ```{r}
 #| echo: true
-ped_dcmp |> 
+ped_dcmp |>
   gg_season(season_year, period = "1 year")
 ```
 
@@ -1238,7 +1258,7 @@ ped_dcmp |>
 
 ```{r}
 #| echo: true
-ped_dcmp |> 
+ped_dcmp |>
   gg_season(season_week, period = "1 week")
 ```
 
@@ -1265,7 +1285,7 @@ The weekly seasonal pattern interacts with the daily seasonal pattern, so the mo
 
 ```{r}
 #| echo: true
-ped_dcmp |> 
+ped_dcmp |>
   gg_season(season_day, period = "1 day")
 ```
 
@@ -1301,9 +1321,9 @@ Combine interacting seasonalities and use facets to separate the interactions (e
 ```{r}
 #| echo: true
 #| eval: false
-ped_dcmp |> 
-  mutate(Weekday = wday(Date_Time, week_start = 1) %in% 1:5) |> 
-  gg_season(season_day + season_week, period = "1 day") + 
+ped_dcmp |>
+  mutate(Weekday = wday(Date_Time, week_start = 1) %in% 1:5) |>
+  gg_season(season_day + season_week, period = "1 day") +
   facet_wrap(vars(Weekday))
 ```
 :::
@@ -1312,9 +1332,9 @@ ped_dcmp |>
 ::: {.fragment .fade-up fragment-index=1}
 ```{r}
 #| echo: false
-ped_dcmp |> 
-  mutate(Weekday = wday(Date_Time, week_start = 1) %in% 1:5) |> 
-  gg_season(season_day + season_week, period = "1 day") + 
+ped_dcmp |>
+  mutate(Weekday = wday(Date_Time, week_start = 1) %in% 1:5) |>
+  gg_season(season_day + season_week, period = "1 day") +
   facet_wrap(vars(Weekday))
 ```
 :::
@@ -1344,11 +1364,11 @@ This is especially useful to show calendar specific patterns such as holidays.
 #| echo: true
 #| eval: false
 library(sugrrants)
-vic_elec |> 
-  filter(Time < as.Date("2012-05-01")) |> 
-  ggplot(aes(x = hms::as_hms(Time), y = Demand)) + 
-  geom_line() + 
-  facet_calendar(~ Date, nrow = 2)
+vic_elec |>
+  filter(Time < as.Date("2012-05-01")) |>
+  ggplot(aes(x = hms::as_hms(Time), y = Demand)) +
+  geom_line() +
+  facet_calendar(~Date, nrow = 2)
 ```
 
 :::
@@ -1369,12 +1389,12 @@ vic_elec |>
 ```{r}
 #| fig-height: 10
 library(sugrrants)
-vic_elec |> 
-  filter(Time < as.Date("2012-05-01")) |> 
-  ggplot(aes(x = hms::as_hms(Time), y = Demand)) + 
-  geom_line() + 
+vic_elec |>
+  filter(Time < as.Date("2012-05-01")) |>
+  ggplot(aes(x = hms::as_hms(Time), y = Demand)) +
+  geom_line() +
   scale_x_time(breaks = c(9, 17), labels = c("9AM", "5PM")) +
-  facet_calendar(~ Date, nrow = 2) + 
+  facet_calendar(~Date, nrow = 2) +
   labs(x = "Time")
 ```
 
@@ -1430,13 +1450,13 @@ Can you see any holiday effects?
 #| echo: true
 #| code-fold: show
 #| fig-height: 8.5
-pedestrian |> 
-  filter(Sensor == "Southern Cross Station") |> 
-  filter(Date_Time < as.Date("2015-05-01")) |> 
-  ggplot(aes(x = hms::as_hms(Date_Time), y = Count)) + 
-  geom_line() + 
+pedestrian |>
+  filter(Sensor == "Southern Cross Station") |>
+  filter(Date_Time < as.Date("2015-05-01")) |>
+  ggplot(aes(x = hms::as_hms(Date_Time), y = Count)) +
+  geom_line() +
   scale_x_time(breaks = c(9, 17), labels = c("9AM", "5PM")) +
-  facet_calendar(~ Date) + 
+  facet_calendar(~Date) +
   labs(x = "Time", y = "Pedestrian count")
 ```
 
@@ -1527,7 +1547,10 @@ library(httr)
 library(purrr)
 unsplash_pattern <- "([A-Za-z0-9_-]{11})-unsplash\\.jpg"
 slides <- readLines("index.qmd")
-matches <- regmatches(slides, regexpr("backgrounds/[^)]+unsplash\\.jpg", slides))
+matches <- regmatches(
+  slides,
+  regexpr("backgrounds/[^)]+unsplash\\.jpg", slides)
+)
 images <- unique(basename(matches))
 ids <- unique(sub(paste0(".*", unsplash_pattern), "\\1", images))
 
@@ -1541,22 +1564,29 @@ get_unsplash_credit <- function(id) {
     ),
     error = function(e) NULL
   )
-  if (is.null(my_response) || httr::http_error(my_response)) return(fallback)
+  if (is.null(my_response) || httr::http_error(my_response)) {
+    return(fallback)
+  }
 
   xml <- content(my_response)
   name <- xml$user$name
-  if (is.null(name)) return(fallback)
-  desc <- xml$description%||%"Photo"
+  if (is.null(name)) {
+    return(fallback)
+  }
+  desc <- xml$description %||% "Photo"
   width <- max(0, 60 - nchar(name))
   sprintf(
     "* %s: [%s%s](%s)",
     name,
     strtrim(desc, width),
-    if(nchar(desc) > width) "..." else "",
+    if (nchar(desc) > width) "..." else "",
     modify_url("https://unsplash.com/", path = file.path("photos", xml$id))
   )
 }
-htmltools::includeMarkdown(paste0(map_chr(ids, get_unsplash_credit), collapse = "\n"))
+htmltools::includeMarkdown(paste0(
+  map_chr(ids, get_unsplash_credit),
+  collapse = "\n"
+))
 ```
 
 :::
