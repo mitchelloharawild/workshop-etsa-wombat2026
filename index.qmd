@@ -6,26 +6,15 @@ title: "Exploratory time series analysis"
 
 ## Course Overview
 
-Understanding how data changes over time is essential for specifying suitable 
-forecasting models. Comprehensively exploring modern time-series datasets is
-challenging, where a large number of frequently observed time series contains 
-many patterns. This workshop introduces new exploratory techniques to uncover 
-meaningful temporal patterns in time series data.
+Modern time-series datasets are hard to explore: they contain a large number of frequently observed series, each with many patterns of its own. This workshop introduces exploratory techniques to uncover meaningful temporal patterns in time series data.
 
-We’ll explore how to compare patterns across many series using feature-based 
-summaries. Visualizing these features reveals common temporal patterns, cluster 
-related time series, and see how these patterns vary throughout the hierarchical
-structure of the data.
+Time series data can be tricky to represent correctly, especially when the data spans multiple timezones and granularities. The correct representation of time is essential for accurate analysis, and we'll see how to avoid common errors in mixed-granularity operations such as temporal aggregation.
 
-We'll then use a grammar of time series graphics to produce plots that clearly
-show the shape and variability in these patterns. Special attention will be 
-given to the complexities of sub-daily data (such as timezones), allowing us to
-create stunning calendar plots which uncovers holiday effects and complex
-seasonalities.
+Next we'll explore how to compare patterns across many series using feature-based statistical summaries. Visualising these features reveals common temporal patterns at scale, allowing us to quantify and cluster the dynamics of entire collections of time series.
 
-This practical workshop features live demonstrations and hands-on exercises 
-using real-world data, equipping participants with the skills to effectively 
-manipulate and visualize time series data in R.
+Finally we'll visually explore individual time series in detail, using simple plot helpers to quickly create charts that highlight common time series patterns. We'll also leverage the flexibility of the grammar of time series graphics to uncover more complex patterns, such as visualising seasonality  across time zones and using calendar plots to reveal holiday effects.
+
+This practical workshop features live demonstrations and hands-on exercises using real-world data, built around tidy time series tools that extend the tidyverse and ggplot2: `feasts`, and the new packages `mixtime` and `ggtime`. Participants will leave with practical skills to accurately explore and visualise time series data in R.
 
 This workshop will run in-person at [WOMBAT 2026](https://wombat2026.numbat.space/) in Melbourne, Australia on November 30th 2026, from 1:30pm to 5:00pm (3 hours of content with a 30 minute break).
 
@@ -36,9 +25,9 @@ This workshop will run in-person at [WOMBAT 2026](https://wombat2026.numbat.spac
 Participants will learn how to:
 
 1.  Use the tidyverse to wrangle and manipulate time series data
-2.  Visualize data and identify common time series patterns
+2.  Visualise data and identify common time series patterns
 3.  Use time series features to find patterns in many time series
-4.  Apply the grammar of time series graphics to visualize complex seasonalities
+4.  Apply the grammar of time series graphics to visualise complex seasonalities
 
 # Educators
 
@@ -69,16 +58,10 @@ Please bring your own laptop capable of running R.
 
 ## Required software
 
-To be able to complete the exercises of this workshop, please install a suitable IDE (such as RStudio), a recent version of R (4.1+) and the following packages.
-
--   **Time series packages and extensions**
-    -   fpp3
-    -   sugrrants
-
-The following code will install the main packages needed for the workshop.
+To be able to complete the exercises of this workshop, please install a suitable IDE (such as RStudio), a recent version of R (4.1+), and the packages fpp3, feasts, mixtime, and ggtime, which can all be installed with the code below.
 
 ```r
-install.packages(c("fpp3", "sugrrants"))
+install.packages(c("fpp3", "feasts", "mixtime", "ggtime"))
 ```
 
 Please have the required software installed and pre-work completed before attending the workshop.
