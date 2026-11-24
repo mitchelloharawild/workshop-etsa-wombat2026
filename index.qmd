@@ -46,11 +46,11 @@ Participants will learn how to:
 
 # Preparation
 
-The workshop will provide a quick-start overview of exploring time series data and producing forecasts. There is no need for prior experience in time series to get the most out of this workshop.
+The workshop will provide a quick-start overview of exploring time series data. There is no need for prior experience in time series to get the most out of this workshop.
 
 It is expected that you are comfortable with writing R code and using tidyverse packages including dplyr and ggplot2. If you are unfamiliar with writing R code or using the tidyverse, consider working through the learnr materials here: <https://learnr.numbat.space/>.
 
-Some familiarity with statistical concepts such as the mean, variance, quantiles, normal distribution, and regression would be helpful to better understand the forecasts, although this is not strictly necessary.
+Some familiarity with statistical concepts such as the mean, variance, quantiles, normal distribution, and regression would be helpful, although this is not strictly necessary.
 
 ## Required equipment
 
@@ -66,4 +66,4 @@ install.packages(c("fpp3", "feasts", "mixtime", "ggtime"))
 
 If you installed these packages before the workshop week, please run this again to get the latest versions.
 
-Please have the required software installed and pre-work completed before attending the workshop.
+Please have the required software installed before attending the workshop.
