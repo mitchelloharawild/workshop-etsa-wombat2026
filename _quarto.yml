@@ -3,6 +3,7 @@ project:
   resources:
     - "images/opengraph.png"
     - "data"
+    - "slides/libs"
   render:
     - "*.qmd"
     - "!README.qmd"
