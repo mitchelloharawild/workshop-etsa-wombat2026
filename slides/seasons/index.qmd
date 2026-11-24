@@ -27,15 +27,28 @@ editor_options:
 ---
 
 ```{r}
+#| label: workshop-data
 #| include: false
 #| cache: false
 library(fpp3)
-library(mixtime)
-# As converted in the first session
-aus_production <- aus_production |> mutate(Quarter = yearquarter(Quarter))
-PBS <- PBS |> mutate(Month = yearmonth(Month))
-vic_elec <- vic_elec |> mutate(Time = mixtime(Time))
-pedestrian <- pedestrian |> mutate(Date_Time = mixtime(Date_Time))
+library(mixtime) # Load last
+
+# Use mixtime for the time index of each dataset
+aus_production <- aus_production |>
+  mutate(Quarter = yearquarter(Quarter))
+PBS <- PBS |>
+  mutate(Month = yearmonth(Month))
+vic_elec <- vic_elec |>
+  mutate(Time = mixtime(Time))
+pedestrian <- pedestrian |>
+  mutate(Date_Time = mixtime(Date_Time))
+tourism <- tourism |>
+  mutate(Quarter = yearquarter(Quarter))
+```
+
+```{r}
+#| include: false
+#| cache: false
 source("../R/morph/common/morph.R")
 source("../R/morph/season.R")
 source("../R/morph/subseries.R")
@@ -86,6 +99,32 @@ Seasons and calendrical patterns
 :::
 
 ![](../backgrounds/sander-weeteling-KABfjuSOx74-unsplash.jpg){.image-left}
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Setup
+
+Restarted R? Catch up from the first session.
+
+<!-- The code run at the top of these slides -->
+
+```{r}
+#| ref.label: workshop-data
+#| echo: true
+#| eval: false
+```
+
+:::
+:::
+
+![](../backgrounds/nathan-dumlao-5Hl5reICevY-unsplash.jpg){.image-left}
 
 ## {}
 
