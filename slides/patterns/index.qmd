@@ -1613,62 +1613,6 @@ pattern_types_demo |>
 ```{r}
 #| fig-height: 6.5
 #| fig-width: 7
-pbs_scripts |>
-  autoplot(Scripts)
-```
-
-:::
-::: {.column width="52%"}
-
-::: {.poll #additive-scripts}
-Total subsidised prescriptions: additive or multiplicative patterns?
-
-- [x] Additive
-- [ ] Multiplicative
-:::
-
-:::
-:::
-
-
-## {}
-
-::: columns
-::: {.column width="60%"}
-### Additive or multiplicative?
-
-```{r}
-#| code-fold: true
-pbs_scripts |>
-  autoplot(Scripts)
-```
-
-::: fragment
-
-::: callout-tip
-## Additive!
-
-STL works for the patterns in this dataset.
-
-:::
-
-:::
-
-:::
-:::
-
-![](../backgrounds/laura-geror-lGeAZjIhQyo-unsplash.jpg){.image-right}
-
-## {}
-
-### Additive or multiplicative?
-
-::: columns
-::: {.column width="48%"}
-
-```{r}
-#| fig-height: 6.5
-#| fig-width: 7
 aus_retail |>
   summarise(Turnover = sum(Turnover)) |> 
   autoplot(Turnover)
