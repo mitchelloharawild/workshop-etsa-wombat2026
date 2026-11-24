@@ -1442,65 +1442,6 @@ Annual Canadian lynx trappings: seasonal, cyclical, both or neither?
 ```{r}
 #| fig-height: 6.5
 #| fig-width: 7
-library(patchwork)
-sunspots <- as_tsibble(sunspot.year) |> mutate(index = year(as.integer(index)))
-(autoplot(sunspots, value)+ylab(NULL))/autoplot(ACF(sunspots, value))
-```
-
-:::
-::: {.column width="52%"}
-
-::: {.poll #pattern-sunspots}
-Annual sunspots: seasonal, cyclical, both or neither?
-
-- [ ] Seasonal
-- [x] Cyclical
-- [ ] Both
-- [ ] Neither
-:::
-
-:::
-:::
-
-## {}
-
-### Seasonal or Cyclical?
-
-::: columns
-::: {.column width="48%"}
-
-```{r}
-#| fig-height: 6.5
-#| fig-width: 7
-library(patchwork)
-(autoplot(aus_production, Beer)+ylab(NULL))/autoplot(ACF(aus_production, Beer))
-```
-
-:::
-::: {.column width="52%"}
-
-::: {.poll #pattern-beer}
-Quarterly Australian beer production: seasonal, cyclical, both or neither?
-
-- [x] Seasonal
-- [ ] Cyclical
-- [ ] Both
-- [ ] Neither
-:::
-
-:::
-:::
-
-## {}
-
-### Seasonal or Cyclical?
-
-::: columns
-::: {.column width="48%"}
-
-```{r}
-#| fig-height: 6.5
-#| fig-width: 7
 bricks <- aus_production |> filter(!is.na(Bricks))
 (autoplot(bricks, Bricks)+ylab(NULL))/autoplot(ACF(bricks, Bricks, lag_max = 40))
 ```
