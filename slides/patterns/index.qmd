@@ -898,16 +898,19 @@ To re-index by a new variable, use `index_by()`.
 ```{r}
 #| echo: true
 aus_gas_annual <- aus_production |>
+  filter(time_is_complete_at(
+    Quarter, cal_gregorian$year
+  )) |>
   index_by(Year = year(Quarter)) |>
   summarise(Gas = mean(Gas))
-print(aus_gas_annual, n = 4)
+tail(aus_gas_annual, 3)
 ```
 
 ::: {.fragment .fade-up}
-::: {.callout-important}
-## Complete years only?
+::: {.callout-tip}
+## Complete years only
 
-`time_is_complete_at(Quarter, cal_gregorian$year)` finds which observations are in years with all four quarters.
+`time_is_complete_at()` keeps years with all four quarters. 2010 has only two, so its average would be misleading.
 :::
 :::
 
