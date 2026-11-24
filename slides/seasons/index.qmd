@@ -1108,15 +1108,25 @@ It can be difficult to forecast, so first consider if you need daily or sub-dail
 
 ### Complex seasonality
 
-There are two key strategies for clearly plotting multiple seasonal patterns:
+There are three key strategies for clearly plotting multiple seasonal patterns:
 
 ::: {.fragment .fade-up}
 ::: callout-note
 ## Temporal aggregation
 
-Aggregate time into coarser frequencies to sum over finer-grained seasonal patterns.
+Sum over finer-grained seasonal patterns.
 
-This is useful for plotting annual seasonality
+Useful for annual seasonality.
+:::
+:::
+
+::: {.fragment .fade-up}
+::: callout-note
+## Calendar plots
+
+Lay out time like a calendar.
+
+Useful for holidays and sub-daily patterns.
 :::
 :::
 
@@ -1124,9 +1134,9 @@ This is useful for plotting annual seasonality
 ::: callout-note
 ## Seasonal decomposition
 
-Separate each of the seasonal patterns using MSTL (multiple seasonal trend by loess) decomposition.
+Separate each seasonal pattern with MSTL (multiple STL).
 
-This is best for daily / weekly seasonality
+Best for daily / weekly seasonality.
 :::
 :::
 
@@ -1415,6 +1425,241 @@ pedestrian |>
 :::
 
 ![](../backgrounds/nao-takabayashi-dh_2ouVgIYY-unsplash.jpg){.image-right}
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Time zones
+
+Local time repeats when daylight saving ends.
+
+```{r}
+#| echo: true
+x <- datetime(
+  "2026-04-05 01:30:00",
+  tz = "Australia/Melbourne"
+)
+x + hours(1:2)
+```
+
+::: {.fragment .fade-up}
+A day isn't always 24 hours!
+
+```{r}
+#| echo: true
+x + days(1L)
+x + hours(24L)
+```
+:::
+
+:::
+:::
+
+![](../backgrounds/jon-tyson-FlHdnPO6dlw-unsplash.jpg){.image-left}
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Absolute and local time
+
+Sub-daily time is shown in absolute time.
+
+```{r}
+#| echo: true
+#| fig-height: 4
+dst <- vic_elec |>
+  filter(
+    date(Time) >= date("2012-03-31"),
+    date(Time) <= date("2012-04-02")
+  )
+dst |>
+  ggplot(aes(x = Time, y = Demand)) +
+  geom_time_line() +
+  scale_x_mixtime(time_breaks = days(1L))
+```
+
+Daylight saving ended at 3am on 1 April 2012.
+
+:::
+:::
+
+![](../backgrounds/estee-janssens-zni0zgb3bkQ-unsplash.jpg){.image-left}
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Absolute and local time
+
+Use `tz = NA` for local time, changes are dashed.
+
+```{r}
+#| echo: true
+#| fig-height: 4
+dst |>
+  ggplot(aes(x = Time, y = Demand)) +
+  geom_time_line() +
+  scale_x_mixtime(
+    time_breaks = days(1L),
+    time_chronon =
+      cal_gregorian$minute(30L, tz = NA)
+  )
+```
+
+::: {.fragment .fade-up}
+Local time aligns human behaviour, absolute time shows when events coincide.
+:::
+
+:::
+:::
+
+![](../backgrounds/estee-janssens-zni0zgb3bkQ-unsplash.jpg){.image-left}
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Calendar plots
+
+Using calendar layouts for time plots helps to visualise a large number of frequent (sub-daily) observations.
+
+This is especially useful to show calendar specific patterns such as holidays.
+
+```{r}
+#| echo: true
+#| eval: false
+vic_elec |>
+  filter(
+    yearmonth(Time) <= yearmonth("2012 Apr")
+  ) |>
+  ggplot(aes(
+    x = Time, y = Demand,
+    colour = Holiday, group = 1
+  )) +
+  geom_time_line() +
+  coord_calendar(
+    rows = weeks(1L), cols = months(2L)
+  )
+```
+
+:::
+:::
+
+![](../backgrounds/estee-janssens-zni0zgb3bkQ-unsplash.jpg){.image-left}
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+```{r}
+#| fig-height: 10
+vic_elec |>
+  filter(yearmonth(Time) <= yearmonth("2012 Apr")) |>
+  ggplot(aes(x = Time, y = Demand, colour = Holiday, group = 1)) +
+  geom_time_line() +
+  coord_calendar(rows = weeks(1L), cols = months(2L)) +
+  scale_y_continuous(breaks = NULL) +
+  theme(legend.position = "bottom")
+```
+
+:::
+:::
+
+![](../backgrounds/estee-janssens-zni0zgb3bkQ-unsplash.jpg){.image-left}
+
+## {.fragment-remove}
+
+::: columns
+
+::: {.column width="60%"}
+
+### Calendar plots
+
+::: callout-caution
+
+## Your turn!
+
+Create a calendar plot for the first few months of pedestrians at Southern Cross Station.
+
+Here's some code to get you started.
+
+```{r}
+#| echo: true
+#| eval: false
+pedestrian |> 
+  filter(Sensor == "Southern Cross Station") |> 
+  filter(yearmonth(Date_Time) <= yearmonth(???)) |> 
+  ggplot(aes(x = ???, y = ???)) + 
+  geom_time_line() + 
+  coord_???(rows = ???, cols = ???)
+```
+
+Can you see any holiday effects?
+
+:::
+
+:::
+:::
+
+![](../backgrounds/nao-takabayashi-dh_2ouVgIYY-unsplash.jpg){.image-right}
+
+
+## {.fragment-remove}
+
+::: columns
+
+::: {.column width="60%"}
+
+```{r}
+#| echo: true
+#| code-fold: show
+#| fig-height: 8.5
+pedestrian |>
+  filter(Sensor == "Southern Cross Station") |>
+  filter(yearmonth(Date_Time) <= yearmonth("2015 Apr")) |>
+  ggplot(aes(x = Date_Time, y = Count)) +
+  geom_time_line() +
+  coord_calendar(rows = weeks(1L), cols = months(2L)) +
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "Time", y = "Pedestrian count")
+```
+
+:::
+:::
+
+![](../backgrounds/nao-takabayashi-dh_2ouVgIYY-unsplash.jpg){.image-right}
+
 
 ## {.fragment-remove}
 
@@ -1724,240 +1969,6 @@ ped_dcmp |>
 
 ![](../backgrounds/nao-takabayashi-dh_2ouVgIYY-unsplash.jpg){.image-right}
 
-
-## {}
-
-::: columns
-
-::: {.column width="40%"}
-:::
-
-::: {.column width="60%"}
-
-### Time zones
-
-Local time repeats when daylight saving ends.
-
-```{r}
-#| echo: true
-x <- datetime(
-  "2026-04-05 01:30:00",
-  tz = "Australia/Melbourne"
-)
-x + hours(1:2)
-```
-
-::: {.fragment .fade-up}
-A day isn't always 24 hours!
-
-```{r}
-#| echo: true
-x + days(1L)
-x + hours(24L)
-```
-:::
-
-:::
-:::
-
-![](../backgrounds/jon-tyson-FlHdnPO6dlw-unsplash.jpg){.image-left}
-
-
-## {}
-
-::: columns
-
-::: {.column width="40%"}
-:::
-
-::: {.column width="60%"}
-
-### Absolute and local time
-
-Sub-daily time is shown in absolute time.
-
-```{r}
-#| echo: true
-#| fig-height: 4
-dst <- vic_elec |>
-  filter(
-    date(Time) >= date("2012-03-31"),
-    date(Time) <= date("2012-04-02")
-  )
-dst |>
-  ggplot(aes(x = Time, y = Demand)) +
-  geom_time_line() +
-  scale_x_mixtime(time_breaks = days(1L))
-```
-
-Daylight saving ended at 3am on 1 April 2012.
-
-:::
-:::
-
-![](../backgrounds/estee-janssens-zni0zgb3bkQ-unsplash.jpg){.image-left}
-
-
-## {}
-
-::: columns
-
-::: {.column width="40%"}
-:::
-
-::: {.column width="60%"}
-
-### Absolute and local time
-
-Use `tz = NA` for local time, changes are dashed.
-
-```{r}
-#| echo: true
-#| fig-height: 4
-dst |>
-  ggplot(aes(x = Time, y = Demand)) +
-  geom_time_line() +
-  scale_x_mixtime(
-    time_breaks = days(1L),
-    time_chronon =
-      cal_gregorian$minute(30L, tz = NA)
-  )
-```
-
-::: {.fragment .fade-up}
-Local time aligns human behaviour, absolute time shows when events coincide.
-:::
-
-:::
-:::
-
-![](../backgrounds/estee-janssens-zni0zgb3bkQ-unsplash.jpg){.image-left}
-
-
-## {}
-
-::: columns
-
-::: {.column width="40%"}
-:::
-
-::: {.column width="60%"}
-
-### Calendar plots
-
-Using calendar layouts for time plots helps to visualise a large number of frequent (sub-daily) observations.
-
-This is especially useful to show calendar specific patterns such as holidays.
-
-```{r}
-#| echo: true
-#| eval: false
-vic_elec |>
-  filter(
-    yearmonth(Time) <= yearmonth("2012 Apr")
-  ) |>
-  ggplot(aes(
-    x = Time, y = Demand,
-    colour = Holiday, group = 1
-  )) +
-  geom_time_line() +
-  coord_calendar(
-    rows = weeks(1L), cols = months(2L)
-  )
-```
-
-:::
-:::
-
-![](../backgrounds/estee-janssens-zni0zgb3bkQ-unsplash.jpg){.image-left}
-
-
-## {}
-
-::: columns
-
-::: {.column width="40%"}
-:::
-
-::: {.column width="60%"}
-
-```{r}
-#| fig-height: 10
-vic_elec |>
-  filter(yearmonth(Time) <= yearmonth("2012 Apr")) |>
-  ggplot(aes(x = Time, y = Demand, colour = Holiday, group = 1)) +
-  geom_time_line() +
-  coord_calendar(rows = weeks(1L), cols = months(2L)) +
-  scale_y_continuous(breaks = NULL) +
-  theme(legend.position = "bottom")
-```
-
-:::
-:::
-
-![](../backgrounds/estee-janssens-zni0zgb3bkQ-unsplash.jpg){.image-left}
-
-## {.fragment-remove}
-
-::: columns
-
-::: {.column width="60%"}
-
-### Calendar plots
-
-::: callout-caution
-
-## Your turn!
-
-Create a calendar plot for the first few months of pedestrians at Southern Cross Station.
-
-Here's some code to get you started.
-
-```{r}
-#| echo: true
-#| eval: false
-pedestrian |> 
-  filter(Sensor == "Southern Cross Station") |> 
-  filter(yearmonth(Date_Time) <= yearmonth(???)) |> 
-  ggplot(aes(x = ???, y = ???)) + 
-  geom_time_line() + 
-  coord_???(rows = ???, cols = ???)
-```
-
-Can you see any holiday effects?
-
-:::
-
-:::
-:::
-
-![](../backgrounds/nao-takabayashi-dh_2ouVgIYY-unsplash.jpg){.image-right}
-
-
-## {.fragment-remove}
-
-::: columns
-
-::: {.column width="60%"}
-
-```{r}
-#| echo: true
-#| code-fold: show
-#| fig-height: 8.5
-pedestrian |>
-  filter(Sensor == "Southern Cross Station") |>
-  filter(yearmonth(Date_Time) <= yearmonth("2015 Apr")) |>
-  ggplot(aes(x = Date_Time, y = Count)) +
-  geom_time_line() +
-  coord_calendar(rows = weeks(1L), cols = months(2L)) +
-  scale_y_continuous(breaks = NULL) +
-  labs(x = "Time", y = "Pedestrian count")
-```
-
-:::
-:::
-
-![](../backgrounds/nao-takabayashi-dh_2ouVgIYY-unsplash.jpg){.image-right}
 
 ## That's all we have time for!
 
