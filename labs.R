@@ -60,14 +60,6 @@ year(yearmonth("2026 Nov"))
 # Weeks can span two months, so this is an error
 try(yearmonth(yearweek(date("2026-11-30"))))
 
-# Demo: Time zones ----
-x <- datetime("2026-04-05 01:30:00", tz = "Australia/Melbourne")
-x + hours(1:2)
-# A day isn't always 24 hours!
-x + days(1L)
-x + hours(24L)
-
-
 # Exercise 3: Using the appropriate time class ----
 accommodation |>
   as_tibble() |>
@@ -266,6 +258,14 @@ pedestrian |>
   index_by(Day = date(Date_Time)) |>
   summarise(Count = sum(Count)) |>
   gg_season(Count, period = weeks(1L))
+
+
+# Demo: Time zones ----
+x <- datetime("2026-04-05 01:30:00", tz = "Australia/Melbourne")
+x + hours(1:2)
+# A day isn't always 24 hours!
+x + days(1L)
+x + hours(24L)
 
 
 # Demo: Absolute and local time ----
