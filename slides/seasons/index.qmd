@@ -1879,37 +1879,6 @@ The weekly seasonal pattern interacts with the daily seasonal pattern, so the mo
 
 ### Seasonal decomposition
 
-```{r}
-#| echo: true
-ped_dcmp |>
-  gg_season(season_day, period = days(1L)) +
-  scale_x_mixtime(
-    time_breaks = hours(6L),
-    time_labels = "{cyc(hour, day)}h"
-  )
-```
-
-::: callout-important
-## Interaction effects
-
-The weekly seasonal pattern interacts with the daily seasonal pattern, so the model doesn't work here.
-
-:::
-
-:::
-:::
-
-![](../backgrounds/nao-takabayashi-dh_2ouVgIYY-unsplash.jpg){.image-right}
-
-
-## {.fragment-remove}
-
-::: columns
-
-::: {.column width="60%"}
-
-### Seasonal decomposition
-
 ::: callout-tip
 ## Interaction effects
 
