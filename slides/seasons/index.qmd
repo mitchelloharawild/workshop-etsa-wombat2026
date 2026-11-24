@@ -1943,6 +1943,101 @@ ped_dcmp |>
 ![](../backgrounds/nao-takabayashi-dh_2ouVgIYY-unsplash.jpg){.image-right}
 
 
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Exploring many series
+
+::: callout-caution
+## Your turn!
+
+Use features to find an interesting series in `tourism` (e.g. strongly seasonal, or an unusual peak).
+
+Plot its seasonality, then explain what you see.
+
+```{r}
+#| echo: true
+#| eval: false
+tourism |>
+  features(Trips, feat_stl) |>
+  filter(
+    seasonal_strength_year > ???,
+    format(seasonal_peak_year) == ???
+  )
+
+tourism |>
+  filter(Region == ???, Purpose == ???) |>
+  gg_season(Trips, period = ???)
+```
+
+Is the pattern changing over time?
+:::
+
+:::
+:::
+
+![](../backgrounds/autumn-mott-rodeheaver-SPd9CSoWCkY-unsplash.jpg){.image-left}
+
+
+## {.fragment-remove}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Exploring many series
+
+::: {.fragment .fade-out fragment-index=1}
+Which strongly seasonal series peak in Q2?
+
+```{r}
+#| echo: true
+tourism |>
+  features(Trips, feat_stl) |>
+  filter(
+    seasonal_strength_year > 0.6,
+    format(seasonal_peak_year) == "Q2"
+  ) |>
+  select(Region, Purpose, seasonal_peak_year)
+```
+:::
+
+::: {.fragment .fade-up fragment-index=1}
+```{r}
+#| echo: true
+#| fig-height: 4.2
+tourism |>
+  filter(Region == "Blue Mountains") |>
+  filter(Purpose == "Holiday") |>
+  model(STL(Trips)) |>
+  components() |>
+  gg_subseries(season_year, period = years(1L))
+```
+:::
+
+::: {.fragment .fade-up fragment-index=2}
+::: callout-note
+The Q2 peak (autumn, Easter?) is growing since 2010.
+
+Q4 is weakening, and is now the trough.
+:::
+:::
+
+:::
+:::
+
+![](../backgrounds/autumn-mott-rodeheaver-SPd9CSoWCkY-unsplash.jpg){.image-left}
+
+
 ## That's all we have time for!
 
 ::: columns
