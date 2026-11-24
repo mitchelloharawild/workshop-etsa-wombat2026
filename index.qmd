@@ -71,14 +71,13 @@ Please have the required software installed before attending the workshop.
 ::: {.callout-note collapse="true"}
 ## Optional: development versions
 
-Some workshop examples use features newer than the CRAN releases. The slides can still be followed with the CRAN versions, but these examples may differ or error.
+Some workshop examples use features newer than the CRAN releases. The slides can still be followed with the CRAN versions, but these examples may differ or error:
 
-- Seasonal peaks and level shifts shown as times (rather than integers) need the development version of feasts:
+- `stat_summary_time()` and the axis style used in the slides need the development version of ggtime.
+- Seasonal peaks and level shifts shown as times (rather than integers) need the development version of feasts.
 
 ```r
 # install.packages("pak")
-pak::pak("tidyverts/feasts")
+pak::pak(c("tidyverts/feasts", "mitchelloharawild/ggtime"))
 ```
-
-- `stat_summary_time()` in ggtime is not yet available in a public release or branch, so there is no install command for it. If it is released on CRAN before the workshop, update ggtime with `install.packages("ggtime")`.
 :::
