@@ -13,7 +13,7 @@ webr:
 ::: {.callout-note}
 ## Setup
 
-These exercises use the development versions of `mixtime` and `ggtime`, so the code can't be run in this page. Run it in RStudio, after loading this setup code:
+Run the exercise code in your own R session, after this setup code:
 
 ```r
 library(fpp3)
