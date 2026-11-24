@@ -10,7 +10,7 @@ Built from local source on 2026-11-24:
 | Package | CRAN (2026-11-24) | Source used | Unreleased features used |
 |---|---|---|---|
 | mixtime | 0.5.0 | `main` | none needed beyond 0.5.0 |
-| ggtime | 1.1.1 | `stat-time-summary` + uncommitted changes | `stat_summary_time()`, `geom_time_line()` slopes at transitions |
+| ggtime | 1.1.1 | `main` (1.1.1.9000) | `stat_summary_time()`, `geom_time_line()` slopes at transitions, `guide_axis_mixtime()` |
 | feasts | 0.5.0 | `main` | cyclical seasonal peaks, shift times in index class, mixtime duration ACF lags |
 
 Slides needing the new releases ("CRAN blockers"):
@@ -20,9 +20,8 @@ Slides needing the new releases ("CRAN blockers"):
 * Seasonal peaks, and level shifts (session 1). These run on feasts 0.5.0, but
   show integers rather than times.
 
-ggtime's `guide-axis-mixtime` branch (`guide_axis_mixtime()`, simpler default
-labels) was not used. It becomes the default axis guide, so no code changes are
-needed if it is released: just re-render and check the plots.
+ggtime's `guide_axis_mixtime()` is the default axis guide of mixtime scales. All
+plots were re-rendered with it, without code changes.
 
 ## mixtime
 
@@ -105,9 +104,7 @@ needed if it is released: just re-render and check the plots.
 
 * mixtime: `mitchelloharawild/mixtime@9dd8364`
 * feasts: `tidyverts/feasts@a8b4e23`
-* ggtime: installed from `~/github/ggtime` (`stat-time-summary` with
-  uncommitted changes), so is only restorable on this machine. Once pushed, use
-  `renv::install("mitchelloharawild/ggtime")` and `renv::snapshot()`.
+* ggtime: `mitchelloharawild/ggtime@373e848`
 
 mixtime's uncommitted `as.numeric()` fix isn't included. mixtime bugs are
 reported in `mixtime/_dev/bugs/`.
