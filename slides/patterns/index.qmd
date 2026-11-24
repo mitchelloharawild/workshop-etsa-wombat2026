@@ -102,25 +102,11 @@ Time series data and patterns
 ::: {.column width="60%"}
 
 ::: {.callout}
-## :mortar_board: Active research
-
-Some of the content in this workshop is active research.
-
-We want to make time series data visualisation easier, and are creating new R packages and conceptual frameworks for visualising time with calendars.
-
-Anonymous responses to polls, the end-of-class survey, and workshop discussions will be collected for research purposes.
-
-You can find the explanatory statement for this research here: <https://workshop.nectric.com.au/wombat2026/ethics/explanatory-statement.pdf>
-:::
-
-::: {.callout .fragment}
 ## :movie_camera: Recorded workshop
 
 Audio and video from this workshop is being recorded.
 
 The recording will be uploaded to YouTube and shared with you to review the materials. It will **not** be published publicly.
-
-Anonymous transcribed excerpts may be used in our research.
 :::
 
 :::
@@ -149,8 +135,6 @@ Anonymous transcribed excerpts may be used in our research.
 ### Welcome, who am I?
 
 - :mortar_board: PhD candidate at Monash University
-
-  This work is part of my research!
 - :bar_chart: Data consulting and workshops at Nectric
 - :chart_with_upwards_trend: Specialised in time series analysis
 - :package: Develops R packages (**fable**, vitae, etc.)

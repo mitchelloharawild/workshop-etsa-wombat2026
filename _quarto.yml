@@ -3,7 +3,6 @@ project:
   resources:
     - "images/opengraph.png"
     - "data"
-    - "ethics"
   render:
     - "*.qmd"
     - "!README.qmd"

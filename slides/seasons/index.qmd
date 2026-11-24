@@ -1671,33 +1671,6 @@ pedestrian |>
 
 ![](../backgrounds/nao-takabayashi-dh_2ouVgIYY-unsplash.jpg){.image-right}
 
-## {}
-
-
-::: columns
-::: {.column width="60%"}
-
-::: {.callout}
-## :mortar_board: User-study
-
-We would greatly appreciate if you complete this user study form for to help improve the ggtime package design.
-
-You can find the explanatory statement for this research here: <https://workshop.nectric.com.au/wombat2026/ethics/explanatory-statement.pdf>
-
-![](resources/QRCode.gif){height=250px}
-
-You can join my WiFi hotspot if you cannot access Google:
-
-* SSID: IIF-ETSA
-* PASSWORD: 1234567890
-
-:::
-
-:::
-:::
-
-![](../backgrounds/martin-adams-_OZCl4XcpRw-unsplash.jpg){.image-right}
-
 ## That's all we have time for!
 
 ::: columns

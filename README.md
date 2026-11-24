@@ -85,8 +85,6 @@ patterns in sub-daily data.
 
 <!-- * Local/civil and global/absolute time -->
 
-**User-study** (16:50 - 17:00)
-
 ### Format
 
 3.5 hour workshop (3 hours of content with a 30 minute break).
