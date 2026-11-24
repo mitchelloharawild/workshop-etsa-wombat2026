@@ -3,6 +3,7 @@ project:
   resources:
     - "images/opengraph.png"
     - "data"
+    - "labs.R"
     - "slides/libs"
   render:
     - "*.qmd"
@@ -53,7 +54,7 @@ website:
           # - text: Slides
             # href: 'slides.zip'
           - text: Lab sessions
-            href: 'labs.zip'
+            href: labs.R
       - icon: file-certificate
         href: license.qmd
       - icon: github
