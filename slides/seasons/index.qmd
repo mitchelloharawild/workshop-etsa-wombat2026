@@ -1216,10 +1216,10 @@ vic_elec |>
 ```
 
 ::: {.fragment .fade-up fragment-index=1}
-::: callout-important
-## Partial aggregation
+::: callout-caution
+## Question
 
-When aggregating time, you need to ensure the aggregation window has all necessary data. 
+The first and last weeks are incomplete. How did we keep only complete years in annual aggregation?
 :::
 :::
 
@@ -1251,6 +1251,10 @@ vic_weekly <- vic_daily |>
 vic_weekly |>
   autoplot(Demand)
 ```
+
+::: notes
+Days first: applying `time_is_complete_at()` to half-hours also drops the weeks when daylight saving starts (mixtime bug).
+:::
 
 
 :::
