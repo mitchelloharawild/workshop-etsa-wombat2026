@@ -64,4 +64,6 @@ To be able to complete the exercises of this workshop, please install a suitable
 install.packages(c("fpp3", "feasts", "mixtime", "ggtime"))
 ```
 
+If you installed these packages before the workshop week, please run this again to get the latest versions.
+
 Please have the required software installed and pre-work completed before attending the workshop.

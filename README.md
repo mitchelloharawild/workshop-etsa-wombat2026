@@ -76,10 +76,11 @@ and holidays. We will start with visualising seasonal patterns in highly
 aggregated quarterly data and work toward visualising complex seasonal
 patterns in sub-daily data.
 
-- Seasonal plots (aes/data -\> scale -\> coord)
+- Seasonal plots (`gg_season()` and `coord_loop()`)
 - Seasonal sub-series plots
 - Exploring seasonality after STL decomposition
 - Multiple seasonality in daily and sub-daily data
+- Absolute and local time
 - Calendar plots
 
 <!-- * Local/civil and global/absolute time -->
