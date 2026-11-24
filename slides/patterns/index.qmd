@@ -1703,11 +1703,11 @@ More info: <https://otexts.com/fpp3/transformations.html>
 ::: {.column width="60%"}
 ### STL decomposition
 
-Estimate STL decomposition with `STL()`.
+Estimate with `STL()`, then access the components with `components()`.
 
 ```{r}
 #| echo: true
-#| code-line-numbers: "4"
+#| code-line-numbers: "4|5"
 library(feasts)
 dcmp <- tourism |> 
   summarise(Trips = sum(Trips)) |> 
@@ -1724,33 +1724,6 @@ dcmp
 
 <!-- ![](resources/feasts.svg){.sticker-float-right} -->
 
-
-## {}
-
-::: columns
-::: {.column width="60%"}
-### STL decomposition
-
-Access decomposition with `components()`.
-
-```{r}
-#| code-line-numbers: "5"
-#| echo: true
-library(feasts)
-dcmp <- tourism |> 
-  summarise(Trips = sum(Trips)) |> 
-  model(STL(Trips)) |> 
-  components()
-dcmp
-```
-
-
-:::
-:::
-
-![](../backgrounds/laura-geror-lGeAZjIhQyo-unsplash.jpg){.image-right}
-
-<!-- ![](resources/feasts.svg){.sticker-float-right} -->
 
 ## {}
 
