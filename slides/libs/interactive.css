@@ -1,0 +1,176 @@
+/* Interactive slides shared by both decks: polls and slider plots */
+
+/* Live questions: larger text, and for polls across the whole slide, each
+   option's label beside its bar */
+.reveal .lq-question.lq-active .lq-main {
+  font-size: 1.3em;
+}
+.reveal .column .lq-question.lq-active .lq-main {
+  font-size: 1.15em;
+}
+.reveal .slide > .lq-question .lq-bars {
+  display: grid;
+  grid-template-columns: fit-content(50%) minmax(0, 1fr) auto;
+  align-content: center;
+  column-gap: 0.8em;
+  row-gap: calc(0.7em * var(--lq-fit));
+}
+.reveal .slide > .lq-question .lq-row {
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  grid-template-areas: "label track stat";
+}
+.reveal .lq-question.lq-active .lq-side {
+  width: 9.5em;
+}
+
+/* Slider plots (webr-slider.js and loop-slider.js) */
+.reveal .webr-slider {
+  max-width: 1256px;
+  font-size: 17px;
+  color: #222;
+}
+.reveal .webr-slider .webr-slider-title {
+  font-size: 25px;
+  line-height: 1.2;
+}
+.reveal .webr-slider .webr-slider-subtitle {
+  font-size: 21px;
+  line-height: 1.2;
+}
+.reveal .webr-slider .webr-slider-plot svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.reveal .webr-slider .webr-slider-controls {
+  display: flex;
+  align-items: center;
+  gap: 1.6em;
+  margin-top: 36px;
+  padding-bottom: 24px;
+  font-size: 22px;
+}
+.reveal .webr-slider .webr-slider-controls label {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.reveal .webr-slider .webr-slider-controls .webr-slider-track {
+  position: relative;
+  flex: 0 1 480px;
+  min-width: 0;
+}
+.reveal .webr-slider .webr-slider-controls .webr-slider-input {
+  display: flex;
+  flex: 0 1 640px;
+  align-items: center;
+  gap: 0.8em;
+}
+.reveal .webr-slider .webr-slider-controls .webr-slider-input:only-of-type {
+  flex: 1 1 auto;
+}
+.reveal .webr-slider .webr-slider-controls .webr-slider-input:only-of-type .webr-slider-track {
+  flex: 1 1 auto;
+}
+.reveal .webr-slider .webr-slider-track {
+  --thumb: 18px;
+}
+.reveal .webr-slider .webr-slider-track input[type=range] {
+  display: block;
+  width: 100%;
+  height: var(--thumb);
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+.reveal .webr-slider .webr-slider-track input[type=range]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, #2a76dd calc(var(--fill, 0) * 100%), #d9d9d9 0);
+}
+.reveal .webr-slider .webr-slider-track input[type=range]::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, #2a76dd calc(var(--fill, 0) * 100%), #d9d9d9 0);
+}
+.reveal .webr-slider .webr-slider-track input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: var(--thumb);
+  height: var(--thumb);
+  margin-top: calc(3px - var(--thumb) / 2);
+  border: none;
+  border-radius: 50%;
+  background: #2a76dd;
+}
+.reveal .webr-slider .webr-slider-track input[type=range]::-moz-range-thumb {
+  width: var(--thumb);
+  height: var(--thumb);
+  border: none;
+  border-radius: 50%;
+  background: #2a76dd;
+}
+.reveal .webr-slider .webr-slider-track output {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: calc(var(--thumb) / 2 + var(--fill, 0) * (100% - var(--thumb)));
+  transform: translateX(-50%);
+  padding: 1px 7px;
+  border-radius: 4px;
+  background: #2a76dd;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.reveal .webr-slider .webr-slider-track output::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border: 5px solid transparent;
+  border-top-color: #2a76dd;
+}
+.reveal .webr-slider .webr-slider-track .webr-slider-ticks {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  font-size: 14px;
+  color: #6b6b6b;
+}
+.reveal .webr-slider .webr-slider-track .webr-slider-ticks:empty {
+  display: none;
+}
+.reveal .webr-slider .webr-slider-track .webr-slider-ticks span {
+  position: absolute;
+  top: 4px;
+  left: calc(var(--thumb) / 2 + var(--at) * (100% - var(--thumb)));
+  transform: translateX(-50%);
+  padding-top: 5px;
+  font-variant-numeric: tabular-nums;
+}
+.reveal .webr-slider .webr-slider-track .webr-slider-ticks span::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 5px;
+  border-left: 1px solid #6b6b6b;
+}
+.reveal .webr-slider .webr-slider-status {
+  color: #6b6b6b;
+  white-space: nowrap;
+  font-size: 0.8em;
+}
+
+.reveal .loop-slider-code {
+  margin-bottom: 8px;
+  font-family: var(--r-code-font, monospace);
+  font-size: 22px;
+}

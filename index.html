@@ -172,7 +172,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">Everything</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./labs.zip">
+    <a class="dropdown-item" href="./labs.R">
  <span class="dropdown-text">Lab sessions</span></a>
   </li>  
     </ul>
@@ -272,9 +272,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="preparation" class="level1">
 <h1>Preparation</h1>
-<p>The workshop will provide a quick-start overview of exploring time series data and producing forecasts. There is no need for prior experience in time series to get the most out of this workshop.</p>
+<p>The workshop will provide a quick-start overview of exploring time series data. There is no need for prior experience in time series to get the most out of this workshop.</p>
 <p>It is expected that you are comfortable with writing R code and using tidyverse packages including dplyr and ggplot2. If you are unfamiliar with writing R code or using the tidyverse, consider working through the learnr materials here: <a href="https://learnr.numbat.space/" class="uri">https://learnr.numbat.space/</a>.</p>
-<p>Some familiarity with statistical concepts such as the mean, variance, quantiles, normal distribution, and regression would be helpful to better understand the forecasts, although this is not strictly necessary.</p>
+<p>Some familiarity with statistical concepts such as the mean, variance, quantiles, normal distribution, and regression would be helpful, although this is not strictly necessary.</p>
 <section id="required-equipment" class="level2">
 <h2 class="anchored" data-anchor-id="required-equipment">Required equipment</h2>
 <p>Please bring your own laptop capable of running R.</p>
@@ -283,7 +283,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="required-software">Required software</h2>
 <p>To be able to complete the exercises of this workshop, please install a suitable IDE (such as RStudio), a recent version of R (4.1+), and the packages fpp3, feasts, mixtime, and ggtime, which can all be installed with the code below.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"fpp3"</span>, <span class="st">"feasts"</span>, <span class="st">"mixtime"</span>, <span class="st">"ggtime"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Please have the required software installed and pre-work completed before attending the workshop.</p>
+<p>If you installed these packages before the workshop week, please run this again to get the latest versions.</p>
+<p>Please have the required software installed before attending the workshop.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Optional: development versions
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Some workshop examples use features newer than the CRAN releases. The slides can still be followed with the CRAN versions, but these examples may differ or error:</p>
+<ul>
+<li><code>stat_summary_time()</code> and the axis style used in the slides need the development version of ggtime.</li>
+<li>Seasonal peaks and level shifts shown as times (rather than integers) need the development version of feasts.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("pak")</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>pak<span class="sc">::</span><span class="fu">pak</span>(<span class="fu">c</span>(<span class="st">"tidyverts/feasts"</span>, <span class="st">"mitchelloharawild/ggtime"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
 
 
 </section>
