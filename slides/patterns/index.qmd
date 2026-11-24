@@ -1757,6 +1757,82 @@ as_tsibble(dcmp) |>
 ## {}
 
 ::: columns
+::: {.column width="60%"}
+### STL decomposition
+
+::: {.callout-caution}
+## Exercise 6
+
+Decompose the cost of antidiabetic scripts, then plot its components and the seasonally adjusted series.
+
+```{r}
+#| eval: false
+#| echo: true
+a10 <- PBS |>
+  filter(ATC2 == "A10") |>
+  summarise(Cost = sum(Cost) / 1e6)
+a10_dcmp <- a10 |>
+  model(STL(???)) |>
+  components()
+
+# Plot the components
+a10_dcmp |> ???
+
+# Plot the seasonally adjusted data
+as_tsibble(a10_dcmp) |> autoplot(???)
+```
+
+*Hint: are the patterns additive or multiplicative?*
+:::
+
+:::
+:::
+
+![](../backgrounds/laura-geror-lGeAZjIhQyo-unsplash.jpg){.image-right}
+
+## {}
+
+### Exercise 6: the cost of antidiabetic scripts
+
+::: columns
+::: {.column width="48%"}
+
+```{r}
+#| label: a10-dcmp
+#| echo: true
+#| fig-width: 7
+#| fig-height: 5
+a10 <- PBS |>
+  filter(ATC2 == "A10") |>
+  summarise(Cost = sum(Cost) / 1e6)
+a10_dcmp <- a10 |>
+  model(STL(log(Cost))) |>
+  components()
+a10_dcmp |> autoplot()
+```
+
+:::
+::: {.column width="52%"}
+
+```{r}
+#| label: a10-adjust
+#| echo: true
+#| fig-width: 7
+#| fig-height: 3.5
+as_tsibble(a10_dcmp) |>
+  autoplot(exp(season_adjust)) +
+  labs(y = "Cost ($ millions)")
+```
+
+* `log()` makes the patterns additive
+* `exp()` converts back to dollars
+
+:::
+:::
+
+## {}
+
+::: columns
 ::: {.column width="40%"}
 :::
 ::: {.column width="60%"}
