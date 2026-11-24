@@ -688,50 +688,6 @@ day_of_week(today) < day_of_week(6L)
 
 ::: {.column width="60%"}
 
-### Time components
-
-![](resources/mixtime.svg){.sticker-float-right}
-
-Split time into linear and cyclical parts.
-
-```{r}
-#| echo: true
-time_components(
-  date("2026-11-30"),
-  year = lin(year), month = cyc(month, year),
-  day = cyc(day, cal_isoweek$week)
-)
-```
-
-::: {.fragment .fade-up}
-Use the same parts to parse text.
-
-```{r}
-#| echo: true
-time_parse(
-  "30/11/2026", format = paste0(
-    "{cyc(day, month)}/{cyc(month, year)}/",
-    "{lin(year)}"
-  )
-)
-```
-:::
-
-:::
-:::
-
-![](../backgrounds/jon-tyson-FlHdnPO6dlw-unsplash.jpg){.image-left}
-
-
-## {}
-
-::: columns
-
-::: {.column width="40%"}
-:::
-
-::: {.column width="60%"}
-
 ### Mixing granularities
 
 Time of different granularities can be combined...
@@ -2200,6 +2156,50 @@ More info: <https://otexts.com/fpp3/features.html>
 ![](../backgrounds/sander-weeteling-KABfjuSOx74-unsplash.jpg){.image-right}
 
 <!-- Made with :heart: and [Quarto](https://quarto.org/). -->
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Time components [(extra)]{.smaller}
+
+![](resources/mixtime.svg){.sticker-float-right}
+
+Split time into linear and cyclical parts.
+
+```{r}
+#| echo: true
+time_components(
+  date("2026-11-30"),
+  year = lin(year), month = cyc(month, year),
+  day = cyc(day, cal_isoweek$week)
+)
+```
+
+::: {.fragment .fade-up}
+Use the same parts to parse text.
+
+```{r}
+#| echo: true
+time_parse(
+  "30/11/2026", format = paste0(
+    "{cyc(day, month)}/{cyc(month, year)}/",
+    "{lin(year)}"
+  )
+)
+```
+:::
+
+:::
+:::
+
+![](../backgrounds/jon-tyson-FlHdnPO6dlw-unsplash.jpg){.image-left}
 
 
 ## Unsplash credits
