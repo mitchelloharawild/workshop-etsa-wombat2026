@@ -1,14 +1,23 @@
 library(fpp3)
+library(mixtime)
+
+# Use mixtime for the time index of each dataset
+tourism <- tourism |> mutate(Quarter = yearquarter(Quarter))
+aus_production <- aus_production |> mutate(Quarter = yearquarter(Quarter))
+PBS <- PBS |> mutate(Month = yearmonth(Month))
+vic_elec <- vic_elec |> mutate(Time = mixtime(Time))
+pedestrian <- pedestrian |> mutate(Date_Time = mixtime(Date_Time))
+
 tourism |>
   filter(Quarter == yearquarter("1998 Q1"))
 
 library(fpp3)
 accommodation <- read.csv(
-  "https://workshop.nectric.com.au/user2024/data/aus_accommodation.csv"
+  "https://workshop.nectric.com.au/wombat2026/data/aus_accommodation.csv"
 )
 
 as_tibble(accommodation) |>
-  mutate(Date = yearquarter(Date)) |>
+  mutate(Date = yearquarter(date(Date))) |>
   as_tsibble(
     index = Date,
     key = c(State)
@@ -26,8 +35,7 @@ tourism |>
 
 tourism |>
   # Calculate annual totals
-  mutate(Year = year(Quarter)) |>
-  index_by(Year) |>
+  index_by(Year = year(Quarter)) |>
   # Calculate total Trips
   summarise(Total_Trips = sum(Trips), avg_trips = mean(Trips))
 
@@ -35,28 +43,33 @@ tourism |>
   features(Trips, feat_stl) |>
   slice_max(trend_strength, n = 3) |>
   inner_join(x = tourism, y = _, by = join_by(Region, State, Purpose)) |>
-  ggplot(aes(x = Quarter, y = Trips)) + geom_line() +
+  ggplot(aes(x = Quarter, y = Trips)) + geom_time_line() +
   facet_grid(vars(Region, State, Purpose), scales = "free_y")
+
+# Peak quarter of each series, as cyclical time
+tourism |>
+  features(Trips, feat_stl) |>
+  count(Purpose, seasonal_peak_year)
 
 ?features_by_tag
 
 pbs_scripts <- PBS |>
   summarise(Scripts = sum(Scripts))
 pbs_scripts |>
-  ggplot(aes(x = month(Month, label = TRUE), y = Scripts, group = year(Month))) +
-  geom_line()
+  ggplot(aes(x = Month, y = Scripts)) +
+  geom_time_line() +
+  coord_loop(time_loops = years(1L))
 
 pbs_scripts |>
-  gg_season(Scripts, period = "1 year")
+  gg_season(Scripts, period = years(1L))
 
-library(fpp3)
 aus_production |>
   autoplot(Gas)
 
 # gg_season()
 
 aus_production |>
-  gg_season(Gas, period = "1 year") +
+  gg_season(Gas, period = years(1L)) +
   scale_y_log10()
 
 aus_production |>
@@ -96,22 +109,22 @@ pbs_scripts |>
 
 vic_elec |>
   ggplot(aes(y = Demand, x = Temperature,
-             colour = wday(Time) %in% 2:6)) +
+             colour = day_of_week(Time) < day_of_week(6L))) +
   geom_point(alpha = 0.1) +
   theme_minimal()
 
 pedestrian |>
   filter(Sensor == "Southern Cross Station") |>
-  index_by(Date) |>
+  index_by(Day = date(Date_Time)) |>
   summarise(Count = sum(Count)) |>
-  gg_season(Count, period = "1 week")
+  gg_season(Count, period = weeks(1L))
 
 pedestrian |>
   filter(Sensor == "Southern Cross Station") |>
-  # index_by(Date) |>
+  # index_by(Day = date(Date_Time)) |>
   # summarise(Count = sum(Count)) |>
   fill_gaps() |>
-  gg_season(Count, period = "1 week")
+  gg_season(Count, period = weeks(1L))
 
 ped_dcmp <- pedestrian |>
   filter(Sensor == "Southern Cross Station") |>
@@ -121,13 +134,13 @@ ped_dcmp <- pedestrian |>
 ped_dcmp |>
   autoplot()
 ped_dcmp |>
-  gg_season(season_year, period = "year")
+  gg_season(season_year, period = years(1L))
 ped_dcmp |>
-  gg_season(season_week, period = "week")
+  gg_season(season_week, period = weeks(1L))
 ped_dcmp |>
-  gg_season(season_day, period = "day")
+  gg_season(season_day, period = days(1L))
 ped_dcmp |>
-  gg_season(season_day + season_week, period = "week")
+  gg_season(season_day + season_week, period = weeks(1L))
 
 
 ped_dcmp <- pedestrian |>
@@ -137,22 +150,47 @@ ped_dcmp <- pedestrian |>
   components()
 
 ped_dcmp |>
-  mutate(weekday = wday(Date_Time) %in% 2:6) |>
-  gg_season(season_week, period = "day") +
-  facet_wrap(vars(weekday))
+  as_tsibble() |>
+  mutate(Weekday = day_of_week(Date_Time) < day_of_week(6L)) |>
+  ggplot(aes(x = Date_Time, y = season_week, colour = Weekday, group = 1)) +
+  geom_time_line(alpha = 0.1) +
+  coord_loop(time_loops = days(1L)) +
+  scale_x_mixtime(time_breaks = hours(6L), time_labels = "{cyc(hour, day)}h")
 
+# Weekly aggregation, using only complete weeks
+vic_weekly <- vic_elec |>
+  index_by(Day = date(Time)) |>
+  summarise(Demand = sum(Demand)) |>
+  filter(time_is_complete_at(Day, cal_isoweek$week)) |>
+  index_by(Week = yearweek(Day)) |>
+  summarise(Demand = sum(Demand))
+vic_weekly |>
+  gg_season(Demand, period = years(1L, calendar = cal_isoweek))
 
-library(sugrrants)
+# Aggregate within the plot
 vic_elec |>
-  filter(Time < as.Date("2012-05-01")) |>
-  ggplot(aes(x = hms::as_hms(Time), y = Demand)) +
-  geom_line() +
-  facet_calendar(~ Date, nrow = 2)
+  index_by(Day = date(Time)) |>
+  summarise(Demand = sum(Demand)) |>
+  ggplot(aes(x = Day, y = Demand)) +
+  geom_time_line(colour = "grey60") +
+  stat_summary_time(granule = weeks(1L), fun = mean, colour = "steelblue")
 
+# Local time across the end of daylight saving
+vic_elec |>
+  filter(date(Time) >= date("2012-03-31"), date(Time) <= date("2012-04-02")) |>
+  ggplot(aes(x = Time, y = Demand)) +
+  geom_time_line() +
+  scale_x_mixtime(time_chronon = cal_gregorian$minute(30L, tz = NA))
+
+vic_elec |>
+  filter(yearmonth(Time) <= yearmonth("2012 Apr")) |>
+  ggplot(aes(x = Time, y = Demand, colour = Holiday, group = 1)) +
+  geom_time_line() +
+  coord_calendar(rows = weeks(1L), cols = months(2L))
 
 pedestrian |>
   filter(Sensor == "Southern Cross Station") |>
-  filter(Date_Time < as.Date("2015-05-01")) |>
-  ggplot(aes(x = hms::as_hms(Date_Time), y = Count)) +
-  geom_line() +
-  facet_calendar(~ as.Date(Date_Time))
+  filter(yearmonth(Date_Time) <= yearmonth("2015 Apr")) |>
+  ggplot(aes(x = Date_Time, y = Count)) +
+  geom_time_line() +
+  coord_calendar(rows = weeks(1L), cols = months(2L))
