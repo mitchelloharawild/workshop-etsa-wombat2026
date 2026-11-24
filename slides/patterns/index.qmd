@@ -1995,16 +1995,54 @@ Which travel purpose is most seasonal?
 ::: {.column width="60%"}
 ### The most seasonal series
 
+::: {.callout-caution}
+## Exercise 7
+
+Find and plot the three most seasonal series.
+
+```{r}
+#| eval: false
+#| echo: true
+tourism |>
+  features(???, ???) |>
+  slice_max(???, n = 3) |>
+  inner_join(x = tourism, y = _,
+    by = join_by(Region, State, Purpose)) |>
+  ggplot(aes(x = ???, y = ???)) +
+  geom_time_line() +
+  facet_grid(vars(Region, State, Purpose),
+    scales = "free_y")
+```
+
+*Extension: which series have the strongest trend?*
+:::
+
+:::
+:::
+
+![](../backgrounds/jon-tyson-FlHdnPO6dlw-unsplash.jpg){.image-left}
+
+## {}
+
+::: columns
+::: {.column width="40%"}
+:::
+::: {.column width="60%"}
+### The most seasonal series
+
 ```{r}
 #| label: season-plot
 #| echo: true
-#| fig-height: 5.5
+#| fig-height: 4.8
 tourism |>
   features(Trips, feat_stl) |>
-  slice_max(seasonal_strength_year, n = 3) |> 
-  inner_join(x = tourism, y = _, by = join_by(Region, State, Purpose)) |> 
-  ggplot(aes(x = Quarter, y = Trips)) + geom_time_line() + 
-  facet_grid(vars(Region, State, Purpose), scales = "free_y")
+  slice_max(seasonal_strength_year, n = 3) |>
+  inner_join(x = tourism, y = _,
+    by = join_by(Region, State, Purpose)) |>
+  ggplot(aes(x = Quarter, y = Trips)) +
+  geom_time_line() +
+  facet_grid(vars(Region, State, Purpose),
+    scales = "free_y")
 ```
 
 :::
@@ -2023,13 +2061,16 @@ tourism |>
 ```{r}
 #| label: trend-plot
 #| echo: true
-#| fig-height: 5.5
+#| fig-height: 4.8
 tourism |>
   features(Trips, feat_stl) |>
-  slice_max(trend_strength, n = 3) |> 
-  inner_join(x = tourism, y = _, by = join_by(Region, State, Purpose)) |> 
-  ggplot(aes(x = Quarter, y = Trips)) + geom_time_line() + 
-  facet_grid(vars(Region, State, Purpose), scales = "free_y")
+  slice_max(trend_strength, n = 3) |>
+  inner_join(x = tourism, y = _,
+    by = join_by(Region, State, Purpose)) |>
+  ggplot(aes(x = Quarter, y = Trips)) +
+  geom_time_line() +
+  facet_grid(vars(Region, State, Purpose),
+    scales = "free_y")
 ```
 
 :::
