@@ -69,7 +69,7 @@ toward summarising patterns across a large collections of time series.
 
 **Break** (15:00 - 15:30)
 
-**Session 2** (15:30 - 16:50)
+**Session 2** (15:30 - 17:00)
 
 The second session focuses on calendrical patterns such as seasonality
 and holidays. We will start with visualising seasonal patterns in highly
@@ -78,10 +78,12 @@ patterns in sub-daily data.
 
 - Seasonal plots (`gg_season()` and `coord_loop()`)
 - Seasonal sub-series plots
-- Exploring seasonality after STL decomposition
-- Multiple seasonality in daily and sub-daily data
-- Absolute and local time
+- Seasonality after STL decomposition
+- Multiple seasonality with temporal aggregation
+- Time zones with absolute and local time
 - Calendar plots
+- Seasonal decomposition of multiple seasonality
+- Capstone exercise: connecting features with seasonal plots
 
 <!-- * Local/civil and global/absolute time -->
 
