@@ -5,13 +5,22 @@ execute:
 format:
   letterbox-revealjs:
     theme: [default]
-    css: [theme.css]
+    css: [theme.css, ../libs/interactive.css]
     progress: false
     menu: false
     width: 1280
     height: 720
 filters:
   - custom-callouts
+  - live-questions
+revealjs-plugins:
+  - live-questions
+live-questions:
+  server: https://poll.nectric.com.au
+  # One room for both decks, so question ids must differ between them
+  session: wombat2026
+  # Press T to show results and A to reveal the answer, after discussion
+  results: hidden
 callout-appearance: simple
 editor_options: 
   chunk_output_type: console
@@ -27,6 +36,16 @@ aus_production <- aus_production |> mutate(Quarter = yearquarter(Quarter))
 PBS <- PBS |> mutate(Month = yearmonth(Month))
 vic_elec <- vic_elec |> mutate(Time = mixtime(Time))
 pedestrian <- pedestrian |> mutate(Date_Time = mixtime(Date_Time))
+source("../R/morph/common/morph.R")
+source("../R/morph/season.R")
+source("../R/morph/subseries.R")
+source("../R/loop-slider.R")
+```
+
+```{=html}
+<script src="../libs/d3.min.js"></script>
+<script src="../libs/plot.umd.min.js"></script>
+<script src="../libs/loop-slider.js"></script>
 ```
 
 ## {}
@@ -243,6 +262,47 @@ pbs_scripts |>
 
 ## {}
 
+### How looping works
+
+::::: {.morph-slide}
+
+```{r}
+#| label: scripts-loop
+#| cache: false
+#| output: asis
+season_morph(
+  pbs_scripts, Scripts, id = "scripts-loop",
+  alt = "Animation of a time plot of monthly scripts being looped around each year into a season plot."
+)
+```
+
+:::: {.morph-captions}
+
+::: {.morph-step}
+Monthly scripts in *linear* time.
+:::
+
+::: {.morph-step .fragment .fade-in-then-out}
+Each month belongs to a year. Split the line between years.
+:::
+
+::: {.morph-step .fragment .fade-in-then-out}
+Loop each year back to the start, one at a time.
+:::
+
+::: {.morph-step .fragment .fade-in-then-out}
+The season plot: *cyclical* time.
+
+December still connects to the next January.
+:::
+
+::::
+
+:::::
+
+
+## {}
+
 ::: columns
 
 ::: {.column width="40%"}
@@ -272,6 +332,37 @@ When are the most scripts (the peak) and the least scripts (the trough) issued?
 
 ![](../backgrounds/autumn-mott-rodeheaver-SPd9CSoWCkY-unsplash.jpg){.image-left}
 
+
+## {}
+
+### Visualising seasonality
+
+::: columns
+::: {.column width="48%"}
+
+```{r}
+#| fig-height: 6.5
+#| fig-width: 7
+pbs_scripts |>
+  ggplot(aes(x = Month, y = Scripts)) +
+  geom_time_line() +
+  coord_loop(time_loops = years(1L))
+```
+
+:::
+::: {.column width="52%"}
+
+::: {.poll #scripts-trough-month}
+In which month are the fewest scripts usually issued?
+
+- [x] February
+- [ ] June
+- [ ] September
+- [ ] December
+:::
+
+:::
+:::
 
 ## {}
 
@@ -396,6 +487,19 @@ Other common seasonal periods include:
 
 ![](../backgrounds/autumn-mott-rodeheaver-SPd9CSoWCkY-unsplash.jpg){.image-left}
 
+## {}
+
+### What if the loop is the wrong length?
+
+```{r}
+#| label: scripts-loop-length
+#| cache: false
+loop_slider(pbs_scripts, "Scripts")
+```
+
+Why does 24 months also work? What about 6?
+
+
 ## {.fragment-remove}
 
 ::: columns
@@ -428,6 +532,35 @@ Plot the shape of the seasonal pattern, in which quarter does Australia produce 
 
 ![](../backgrounds/pruthvi-sagar-a-r-xxgNqAtIJ0s-unsplash.jpg){.image-right}
 
+
+## {}
+
+### Visualising seasonality
+
+::: columns
+::: {.column width="48%"}
+
+```{r}
+#| fig-height: 6.5
+#| fig-width: 7
+aus_production |>
+  gg_season(Gas, period = years(1L))
+```
+
+:::
+::: {.column width="52%"}
+
+::: {.poll #gas-peak-quarter}
+In which quarter does gas production peak?
+
+- [ ] Q1
+- [ ] Q2
+- [x] Q3
+- [ ] Q4
+:::
+
+:::
+:::
 
 ## {.fragment-remove}
 
@@ -618,6 +751,54 @@ Gas production in Q1 is increasing while Q3 is decreasing.
 
 ![](../backgrounds/pruthvi-sagar-a-r-xxgNqAtIJ0s-unsplash.jpg){.image-right}
 
+## {}
+
+### From time plot to subseries plot
+
+::::: {.morph-slide}
+
+```{r}
+#| label: gas-subseries
+#| cache: false
+#| output: asis
+gas_season <- aus_production |>
+  model(STL(log(Gas))) |>
+  components() |>
+  as_tsibble() |>
+  select(Quarter, season_year)
+subseries_morph(
+  gas_season, season_year, id = "gas-subseries",
+  alt = "Animation of a time plot of the seasonal component of gas production being separated by quarter into a seasonal subseries plot."
+)
+```
+
+:::: {.morph-captions}
+
+::: {.morph-step}
+The seasonal component of log gas production.
+:::
+
+::: {.morph-step .fragment .fade-in-then-out}
+Each observation belongs to a quarter.
+:::
+
+::: {.morph-step .fragment .fade-in-then-out}
+Join observations from the same quarter: four subseries.
+:::
+
+::: {.morph-step .fragment .fade-in-then-out}
+Place the subseries side by side to compare quarters.
+:::
+
+::: {.morph-step .fragment .fade-in-then-out}
+Add the mean of each quarter: the seasonal subseries plot.
+:::
+
+::::
+
+:::::
+
+
 ## {.fragment-remove}
 
 ::: columns
@@ -738,6 +919,36 @@ pbs_scripts |>
 
 ![](../backgrounds/autumn-mott-rodeheaver-SPd9CSoWCkY-unsplash.jpg){.image-left}
 
+
+## {}
+
+### Changing seasonality
+
+::: columns
+::: {.column width="48%"}
+
+```{r}
+#| fig-height: 6.5
+#| fig-width: 7
+pbs_scripts |>
+  model(STL(Scripts)) |>
+  components() |>
+  gg_subseries(season_year, period = years(1L))
+```
+
+:::
+::: {.column width="52%"}
+
+::: {.poll #scripts-december-change}
+How is the December peak in scripts changing since the mid 1990s?
+
+- [ ] Getting larger
+- [x] Getting smaller
+- [ ] Staying the same
+:::
+
+:::
+:::
 
 ## {}
 

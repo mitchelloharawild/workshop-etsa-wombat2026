@@ -1,8 +1,9 @@
 # Interactive explainers to incorporate
 
 Reviewed 2026-11-24, for the workshop on 2026-11-30 (3 hours of content).
-Source: `../workshop-f4sg-africast/materials/` ("AFRICAST" below). Nothing here
-has been added to the slides yet.
+Source: `../workshop-f4sg-africast/materials/` ("AFRICAST" below). Explainers
+1–6 are in the slides, with polls in the `wombat2026` room; 7–10 are not started.
+The sections below are the plan they were made from.
 
 ## Recommendation
 

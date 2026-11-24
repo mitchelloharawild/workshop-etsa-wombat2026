@@ -5,13 +5,22 @@ execute:
 format:
   letterbox-revealjs:
     theme: [default]
-    css: [theme.css, hex.css]
+    css: [theme.css, hex.css, ../libs/interactive.css]
     progress: false
     menu: false
     width: 1280
     height: 720
 filters:
   - custom-callouts
+  - live-questions
+revealjs-plugins:
+  - live-questions
+live-questions:
+  server: https://poll.nectric.com.au
+  # One room for both decks, so question ids must differ between them
+  session: wombat2026
+  # Press T to show results and A to reveal the answer, after discussion
+  results: hidden
 callout-appearance: simple
 editor_options: 
   chunk_output_type: console
@@ -22,6 +31,15 @@ editor_options:
 #| cache: false
 library(fpp3)
 library(mixtime)
+source("../R/morph/common/morph.R")
+source("../R/morph/acf.R")
+source("../R/webr-slider.R")
+```
+
+```{=html}
+<script src="../libs/d3.min.js"></script>
+<script src="../libs/plot.umd.min.js"></script>
+<script src="../libs/webr-slider.js"></script>
 ```
 
 ## {}
@@ -148,36 +166,37 @@ The recording will be uploaded to YouTube and shared with you to review the mate
 
 ## {}
 
+### :raising_hand: Hi, who are you?
 
+::: {.poll #r-proficiency results="live"}
+How proficient are you in using R?
 
-::: columns
-::: {.column width="35%"}
-
-### You!
-
-#### WOMBAT attendee
-
+- Guru: The R core team come to me for advice.
+- Expert: I have written several packages on CRAN.
+- Skilled: I use it regularly and it is an important part of my job.
+- Comfortable: I use it often and am comfortable with the tool.
+- User: I use it sometimes, but I am often searching around for the right function.
+- Learner: I have used it a few times.
+- Beginner: I've managed to download and install it.
+- Unknown: Why are you speaking like a pirate?
 :::
 
-::: {.column width="65%"}
+
+## {}
 
 ### :raising_hand: Hi, who are you?
 
-Hands up if...
+::: {.poll #time-series-experience results="live"}
+How experienced are you with time series?
 
-::: {.incremental}
-* :technologist: You've used R
-* :bar_chart: You've analysed data
-* :bubbles: Used tidyverse packages (dplyr, ggplot2...)
-* :chart_with_upwards_trend: You've worked with time series data before
-* :framed_picture: You've created standard time series plots
-* :art: You've made custom time series graphics
+- Guru: I wrote the book, done it for decades, now I do the conference circuit.
+- Expert: It has been my full time job for more than a decade.
+- Skilled: I have been doing it for years.
+- Comfortable: I understand it and have done it.
+- Learner: I am still learning.
+- Beginner: I have heard of it and would like to learn more.
+- Unknown: What is a time series?
 :::
-
-:::
-:::
-
-![](../backgrounds/john-fowler-RsRTIofe0HE-unsplash.jpg){.image-left}
 
 
 ## {}
@@ -305,6 +324,15 @@ It replaces tsibble and lubridate functions like `yearmonth()` and `year()`.
 :::
 
 ![](../backgrounds/chris-lee-70l1tDAI6rM-unsplash.jpg){.image-left}
+
+## {}
+
+### Your time series
+
+::: {.wordcloud #your-time-series max-words=3 max-answers=3 results="live"}
+What time series data do you work with?
+:::
+
 
 ## {}
 
@@ -1078,6 +1106,105 @@ Incomplete years (2010) become `NA`.
 
 ::: {.column width="60%"}
 
+### Lag plots
+
+A lag plot compares observations with those before them, coloured by season.
+
+```{r}
+#| echo: true
+aus_production |>
+  gg_lag(Gas, geom = "point", period = years(1L))
+```
+
+:::
+:::
+
+![](../backgrounds/nathan-dumlao-5Hl5reICevY-unsplash.jpg){.image-left}
+
+
+## {}
+
+### From lag plots to the ACF
+
+::::: {.morph-slide}
+
+```{r}
+#| label: beer-acf
+#| cache: false
+#| output: asis
+beer <- aus_production |>
+  filter(Quarter >= yearquarter("1992 Q1")) |>
+  select(Quarter, Beer)
+acf_morph(
+  beer, Beer, id = "beer-acf", pause_lag = 4,
+  alt = "Animation of a time plot of quarterly beer production becoming lag plots, and the autocorrelation of each lag plot becoming a bar of an ACF plot."
+)
+```
+
+:::: {.morph-captions}
+
+::: {.morph-step}
+Quarterly Australian beer production since 1992.
+:::
+
+::: {.morph-step .fragment .fade-in-then-out}
+Shift a copy (blue) by one quarter, pairing each observation with the one before it.
+:::
+
+::: {.morph-step .fragment .fade-in-then-out}
+Each pair is a point in the lag plot. The first observation has no pair.
+:::
+
+::: {.morph-step .fragment .fade-in-then-out}
+The autocorrelation $r_1$ is the linear relationship in this lag plot (blue line).
+
+It is small and negative: the first bar.
+:::
+
+::: {.morph-step .fragment .fade-in-then-out}
+At lag 2, quarters are paired with those half a year earlier.
+
+Peaks meet troughs, so $r_2$ is strongly negative.
+:::
+
+::: {.morph-step .fragment .fade-in-then-out}
+At lag 3, quarters are paired with the next quarter of the previous year.
+
+Like lag 1, these are neighbouring quarters.
+:::
+
+::: {.morph-step .fragment .fade-in-then-out}
+At lag 4, quarters are paired with the same quarter a year earlier.
+
+Peaks meet peaks, so $r_4$ is large and positive.
+:::
+
+::: {.morph-step .fragment .fade-in-then-out}
+Continue for lags 5, 6, ...
+
+The seasonal lags 8, 12 and 16 are strongly positive too.
+:::
+
+::: {.morph-step .fragment .fade-in-then-out}
+The ACF plot: one bar for each lag plot.
+
+Bars beyond the dashed lines are unlikely for uncorrelated data.
+:::
+
+::::
+
+:::::
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
 ### ACF plots
 
 An ACF plot shows autocorrelations (lagged relationships). This helps to identify trends, seasons and cycles. Lags are durations (e.g. 12 months).
@@ -1096,27 +1223,52 @@ pbs_scripts |>
 
 ## {}
 
+### Which is which?
+
 ::: columns
-
-::: {.column width="40%"}
-:::
-
-::: {.column width="60%"}
-
-### Lag plots
-
-A lag plot shows the relationship behind each autocorrelation, coloured by season.
+::: {.column width="55%"}
 
 ```{r}
-#| echo: true
-aus_production |>
-  gg_lag(Gas, geom = "point", period = years(1L))
+#| label: acf-match-plot
+#| fig-width: 8
+#| fig-height: 7
+#| warning: false
+library(patchwork)
+cowtemp <- read.csv("resources/cowtemp.csv") |>
+  as_tsibble(index = time)
+mink <- read.csv("resources/mink.csv") |>
+  mutate(time = year(as.integer(time))) |>
+  as_tsibble(index = time)
+us_deaths <- as_tsibble(USAccDeaths) |> mutate(index = yearmonth(index))
+air <- as_tsibble(AirPassengers) |> mutate(index = yearmonth(index))
+series_plot <- function(x, title) {
+  autoplot(x, value) + labs(x = NULL, y = NULL, title = title)
+}
+acf_plot <- function(x, title) {
+  autoplot(ACF(x, value)) +
+    labs(x = NULL, y = NULL, title = title) + ylim(-0.5, 1)
+}
+year_axis <- scale_x_mixtime(time_breaks = years(4L), time_labels = "{lin(year)}")
+(series_plot(cowtemp, "1. Cow temperature (daily)") | acf_plot(us_deaths, "A")) /
+  (series_plot(us_deaths, "2. Accidental deaths (monthly)") + year_axis | acf_plot(cowtemp, "B")) /
+  (series_plot(air, "3. Air passengers (monthly)") + year_axis | acf_plot(mink, "C")) /
+  (series_plot(mink, "4. Mink trappings (annual)") | acf_plot(air, "D"))
 ```
 
 :::
+::: {.column width="45%"}
+
+::: {.poll #acf-match}
+Match each time series (1-4) to its ACF (A-D).
+
+- [ ] 1A, 2B, 3C, 4D
+- [x] 1B, 2A, 3D, 4C
+- [ ] 1B, 2D, 3A, 4C
+- [ ] 1C, 2A, 3D, 4B
 :::
 
-![](../backgrounds/nathan-dumlao-5Hl5reICevY-unsplash.jpg){.image-left}
+:::
+:::
 
 
 ## {}
@@ -1180,48 +1332,185 @@ Cyclical patterns have...
 
 ### Seasonal or Cyclical?
 
-These common patterns are commonly confused, can you tell them apart?
+::: columns
+::: {.column width="48%"}
 
 ```{r}
+#| fig-height: 6.5
+#| fig-width: 7
 library(patchwork)
 deaths <- as_tsibble(USAccDeaths) |> mutate(index = yearmonth(index))
 (autoplot(deaths, value)+ylab(NULL))/autoplot(ACF(deaths, value))
 ```
 
+:::
+::: {.column width="52%"}
+
+::: {.poll #pattern-deaths}
+Monthly accidental deaths in the USA: seasonal, cyclical, both or neither?
+
+- [x] Seasonal
+- [ ] Cyclical
+- [ ] Both
+- [ ] Neither
+:::
+
+:::
+:::
+
 ## {}
 
 ### Seasonal or Cyclical?
 
-These common patterns are commonly confused, can you tell them apart?
+::: columns
+::: {.column width="48%"}
 
 ```{r}
+#| fig-height: 6.5
+#| fig-width: 7
 library(patchwork)
 lynx_pelt <- pelt |> mutate(Year = year(as.integer(Year)))
 (autoplot(lynx_pelt, Lynx)+ylab(NULL))/autoplot(ACF(lynx_pelt, Lynx))
 ```
 
+:::
+::: {.column width="52%"}
+
+::: {.poll #pattern-lynx}
+Annual Canadian lynx trappings: seasonal, cyclical, both or neither?
+
+- [ ] Seasonal
+- [x] Cyclical
+- [ ] Both
+- [ ] Neither
+:::
+
+:::
+:::
+
 ## {}
 
 ### Seasonal or Cyclical?
 
-These common patterns are commonly confused, can you tell them apart?
+::: columns
+::: {.column width="48%"}
 
 ```{r}
+#| fig-height: 6.5
+#| fig-width: 7
 library(patchwork)
 sunspots <- as_tsibble(sunspot.year) |> mutate(index = year(as.integer(index)))
 (autoplot(sunspots, value)+ylab(NULL))/autoplot(ACF(sunspots, value))
 ```
 
+:::
+::: {.column width="52%"}
+
+::: {.poll #pattern-sunspots}
+Annual sunspots: seasonal, cyclical, both or neither?
+
+- [ ] Seasonal
+- [x] Cyclical
+- [ ] Both
+- [ ] Neither
+:::
+
+:::
+:::
+
 ## {}
 
 ### Seasonal or Cyclical?
 
-These common patterns are commonly confused, can you tell them apart?
+::: columns
+::: {.column width="48%"}
 
 ```{r}
+#| fig-height: 6.5
+#| fig-width: 7
 library(patchwork)
 (autoplot(aus_production, Beer)+ylab(NULL))/autoplot(ACF(aus_production, Beer))
 ```
+
+:::
+::: {.column width="52%"}
+
+::: {.poll #pattern-beer}
+Quarterly Australian beer production: seasonal, cyclical, both or neither?
+
+- [x] Seasonal
+- [ ] Cyclical
+- [ ] Both
+- [ ] Neither
+:::
+
+:::
+:::
+
+## {}
+
+### Seasonal or Cyclical?
+
+::: columns
+::: {.column width="48%"}
+
+```{r}
+#| fig-height: 6.5
+#| fig-width: 7
+bricks <- aus_production |> filter(!is.na(Bricks))
+(autoplot(bricks, Bricks)+ylab(NULL))/autoplot(ACF(bricks, Bricks, lag_max = 40))
+```
+
+:::
+::: {.column width="52%"}
+
+::: {.poll #pattern-bricks}
+Quarterly Australian clay brick production: seasonal, cyclical, both or neither?
+
+- [ ] Seasonal
+- [ ] Cyclical
+- [x] Both
+- [ ] Neither
+:::
+
+:::
+:::
+
+
+## {}
+
+### Seasonal or Cyclical?
+
+::: columns
+::: {.column width="48%"}
+
+```{r}
+#| fig-height: 6.5
+#| fig-width: 7
+# Trading days, as there are no prices on weekends and holidays
+amazon <- gafa_stock |>
+  filter(Symbol == "AMZN", lubridate::year(Date) >= 2018) |>
+  as_tibble() |>
+  mutate(Day = row_number()) |>
+  as_tsibble(index = Day)
+(autoplot(amazon, Close)+labs(x = "Trading day", y = NULL))/autoplot(ACF(amazon, Close))
+```
+
+:::
+::: {.column width="52%"}
+
+::: {.poll #pattern-amazon}
+Daily Amazon closing stock price: seasonal, cyclical, both or neither?
+
+- [ ] Seasonal
+- [ ] Cyclical
+- [ ] Both
+- [x] Neither
+:::
+
+:::
+:::
+
 
 ## {}
 
@@ -1331,6 +1620,34 @@ pattern_types_demo |>
 
 ## {}
 
+### Additive or multiplicative?
+
+::: columns
+::: {.column width="48%"}
+
+```{r}
+#| fig-height: 6.5
+#| fig-width: 7
+pbs_scripts |>
+  autoplot(Scripts)
+```
+
+:::
+::: {.column width="52%"}
+
+::: {.poll #additive-scripts}
+Total subsidised prescriptions: additive or multiplicative patterns?
+
+- [x] Additive
+- [ ] Multiplicative
+:::
+
+:::
+:::
+
+
+## {}
+
 ::: columns
 ::: {.column width="60%"}
 ### Additive or multiplicative?
@@ -1356,6 +1673,35 @@ STL works for the patterns in this dataset.
 :::
 
 ![](../backgrounds/laura-geror-lGeAZjIhQyo-unsplash.jpg){.image-right}
+
+## {}
+
+### Additive or multiplicative?
+
+::: columns
+::: {.column width="48%"}
+
+```{r}
+#| fig-height: 6.5
+#| fig-width: 7
+aus_retail |>
+  summarise(Turnover = sum(Turnover)) |> 
+  autoplot(Turnover)
+```
+
+:::
+::: {.column width="52%"}
+
+::: {.poll #additive-retail}
+Total retail turnover: additive or multiplicative patterns?
+
+- [ ] Additive
+- [x] Multiplicative
+:::
+
+:::
+:::
+
 
 ## {}
 
@@ -1525,6 +1871,46 @@ More info: <https://otexts.com/fpp3/stl.html>
 
 ## {}
 
+### Fine-tuning decomposition
+
+```{r}
+#| label: stl-windows
+#| cache: false
+turnover <- aus_retail |>
+  summarise(Turnover = sum(Turnover)) |>
+  mutate(Turnover = log(Turnover))
+webr_slider(
+  turnover, x = "Month",
+  fn = function(data, t_window, s_window) {
+    fit <- stl(ts(data$Turnover, frequency = 12),
+      s.window = s_window, t.window = t_window
+    )$time.series
+    data.frame(
+      `log(Turnover)` = data$Turnover, trend = fit[, "trend"],
+      season_year = fit[, "seasonal"], remainder = fit[, "remainder"],
+      check.names = FALSE
+    )
+  },
+  sliders = list(
+    t_window = list(
+      label = "Trend window", value = 21, min = 7, max = 441, step = 2,
+      log = TRUE, ticks = c(7, 13, 21, 51, 101, 441)
+    ),
+    s_window = list(
+      label = "Seasonal window", value = 13, min = 3, max = 55, step = 2,
+      log = TRUE, ticks = c(3, 5, 7, 9, 13, 19, 27, 55)
+    )
+  ),
+  subtitle = "STL(log(Turnover) ~ trend(window = {t_window}) + season(window = {s_window}))",
+  height = 460
+)
+```
+
+When is the trend too wiggly? When is the seasonality too rigid?
+
+
+## {}
+
 ::: columns
 ::: {.column width="60%"}
 ### Seasonal adjustment
@@ -1676,6 +2062,34 @@ tourism |>
 :::
 
 ![](../backgrounds/jon-tyson-FlHdnPO6dlw-unsplash.jpg){.image-left}
+
+## {}
+
+### Time series features
+
+::: columns
+::: {.column width="48%"}
+```{r}
+#| fig-width: 6.5
+#| fig-height: 6
+tourism |>
+  features(Trips, feat_stl) |>
+  ggplot(aes(x = trend_strength, y = seasonal_strength_year, col = Purpose)) +
+  geom_point() + facet_wrap(vars(State)) +
+  theme(legend.position = "bottom")
+```
+:::
+::: {.column width="52%"}
+::: {.poll #most-seasonal-purpose}
+Which travel purpose is most seasonal?
+
+- [ ] Business
+- [x] Holiday
+- [ ] Other
+- [ ] Visiting
+:::
+:::
+:::
 
 ## {}
 
