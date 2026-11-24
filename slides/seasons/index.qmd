@@ -19,9 +19,14 @@ editor_options:
 
 ```{r}
 #| include: false
+#| cache: false
 library(fpp3)
-aus_accommodation_total <- fpp3::aus_accommodation |>
-  summarise(Takings = sum(Takings), Occupancy = mean(Occupancy))
+library(mixtime)
+# As converted in the first session
+aus_production <- aus_production |> mutate(Quarter = yearquarter(Quarter))
+PBS <- PBS |> mutate(Month = yearmonth(Month))
+vic_elec <- vic_elec |> mutate(Time = mixtime(Time))
+pedestrian <- pedestrian |> mutate(Date_Time = mixtime(Date_Time))
 ```
 
 ## {}
@@ -101,19 +106,51 @@ pbs_scripts |>
 
 ### Visualising temporal patterns
 
-Creating a time plot with `autoplot()` is quick and easy. A time plot can also be made with ggplot2's grammar for more options.
+Creating a time plot with `autoplot()` is quick and easy. A time plot can also be made with the grammar of time series graphics for more options.
 
 ```{r}
 #| echo: true
 pbs_scripts |>
   ggplot(aes(x = Month, y = Scripts)) +
-  geom_line()
+  geom_time_line()
 ```
 
 :::
 :::
 
 ![](../backgrounds/nathan-dumlao-5Hl5reICevY-unsplash.jpg){.image-left}
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Time scales
+
+Axis breaks use durations, and labels use calendar components.
+
+```{r}
+#| echo: true
+pbs_scripts |>
+  ggplot(aes(x = Month, y = Scripts)) +
+  geom_time_line() +
+  scale_x_mixtime(
+    time_breaks = years(2L),
+    time_labels = "{lin(year)}"
+  )
+```
+
+`lin()` is linear time, `cyc()` is cyclical time (e.g. `{cyc(month, year)}`).
+
+:::
+:::
+
+![](../backgrounds/nathan-dumlao-5Hl5reICevY-unsplash.jpg){.image-left}
+
 
 ## {}
 
@@ -154,23 +191,23 @@ How else could we represent time to more clearly show annual seasonal patterns?
 
 ### Visualising seasonality
 
-Adjusting the plot's x-axis so that it shows *cyclical* time (month of year) rather than *continuous* time (year month) highlights seasonal patterns.
+Looping the plot's x-axis around each year arranges *linear* time (year month) *cyclically* (month of year), which highlights seasonal patterns.
 
 ::: callout-caution
 ## Your turn
 
-Try adjusting the following code to plot *month of year* along the x-axis.
+Loop the time axis of this plot with `coord_loop()`.
 
 ```{r}
 #| echo: true
 #| eval: false
 pbs_scripts |>
   ggplot(aes(x = Month, y = Scripts)) +
-  geom_line()
+  geom_time_line() +
+  coord_loop(time_loops = ???)
 ```
 
-
-Hint: `lubridate::month()` and `lubridate::year()` are useful tools for extracting the month and year from time.
+Hint: `time_loops` is a mixtime duration, such as `weeks(2L)` for a fortnight.
 :::
 
 :::
@@ -193,13 +230,9 @@ Hint: `lubridate::month()` and `lubridate::year()` are useful tools for extracti
 ```{r}
 #| echo: true
 pbs_scripts |>
-  ggplot(aes(
-    x = month(Month, label = TRUE),
-    y = Scripts,
-    group = year(Month)
-  )) +
-  geom_line() +
-  labs(x = "Month of Year")
+  ggplot(aes(x = Month, y = Scripts)) +
+  geom_time_line() +
+  coord_loop(time_loops = years(1L))
 ```
 
 :::
@@ -221,13 +254,9 @@ pbs_scripts |>
 
 ```{r}
 pbs_scripts |>
-  ggplot(aes(
-    x = month(Month, label = TRUE),
-    y = Scripts,
-    group = year(Month)
-  )) +
-  geom_line() +
-  labs(x = "Month of Year")
+  ggplot(aes(x = Month, y = Scripts)) +
+  geom_time_line() +
+  coord_loop(time_loops = years(1L))
 ```
 
 ::: callout-caution
@@ -253,12 +282,78 @@ When are the most scripts (the peak) and the least scripts (the trough) issued?
 
 ::: {.column width="60%"}
 
+### Why loop time?
+
+Without `coord_loop()`, the season plot needs seasonal factors.
+
+```{r}
+#| echo: true
+#| eval: false
+aes(
+  x = lubridate::month(Month, label = TRUE),
+  group = lubridate::year(Month)
+)
+```
+
+::: {.callout-important}
+## Seasonal factors are error-prone
+
+* the wrong `group` draws sawtooth lines
+* December isn't connected to January
+* each month has equal length
+* `x` and `group` both change with the season
+:::
+
+:::
+:::
+
+![](../backgrounds/autumn-mott-rodeheaver-SPd9CSoWCkY-unsplash.jpg){.image-left}
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Circular time
+
+Looped time can also be drawn around a circle.
+
+```{r}
+#| echo: true
+pbs_scripts |>
+  ggplot(aes(x = Month, y = Scripts)) +
+  geom_time_line() +
+  coord_loop(
+    time_loops = years(1L), coord = coord_radial()
+  )
+```
+
+:::
+:::
+
+![](../backgrounds/autumn-mott-rodeheaver-SPd9CSoWCkY-unsplash.jpg){.image-left}
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
 ### The season plot
 
 ```{r}
 #| echo: true
 pbs_scripts |>
-  gg_season(Scripts, period = "1 year")
+  gg_season(Scripts, period = years(1L))
 ```
 
 This plot is known as a **season plot**, which can be made quickly with the plot helper function `gg_season()`.
@@ -283,18 +378,18 @@ This plot is known as a **season plot**, which can be made quickly with the plot
 #| echo: true
 #| eval: false
 pbs_scripts |>
-  gg_season(Scripts, period = "1 year")
+  gg_season(Scripts, period = years(1L))
 ```
 
 The `period` argument is a `duration` for the length of the data's seasonal pattern.
 
-It works by rescaling the x-axis so that it repeats after each year.
+It uses `coord_loop(time_loops = period)`, so that the time axis loops around each year.
 
 Other common seasonal periods include:
 
-* `1 week`
-* `1 day`
-* `1 hour`
+* `weeks(1L)`
+* `days(1L)`
+* `hours(1L)`
 
 :::
 :::
@@ -345,7 +440,7 @@ Plot the shape of the seasonal pattern, in which quarter does Australia produce 
 ```{r}
 #| echo: true
 aus_production |>
-  gg_season(Gas, period = "1 year")
+  gg_season(Gas, period = years(1L))
 ```
 
 ::: {.fragment .fade-out fragment-index=1}
@@ -381,7 +476,7 @@ It's hard to see the seasonality from the early data, how can we improve it?
 ```{r}
 #| echo: true
 aus_production |>
-  gg_season(log(Gas), period = "1 year")
+  gg_season(log(Gas), period = years(1L))
 ```
 :::
 
@@ -389,7 +484,7 @@ aus_production |>
 ```{r}
 #| echo: true
 aus_production |>
-  gg_season(Gas, period = "1 year") +
+  gg_season(Gas, period = years(1L)) +
   scale_y_log10()
 ```
 
@@ -449,7 +544,7 @@ Recall that STL allows us to separate trend from seasonality, let's plot only th
 aus_production |>
   model(STL(log(Gas))) |>
   components() |>
-  gg_season(season_year, period = "1 year")
+  gg_season(season_year, period = years(1L))
 ```
 
 ::: {.fragment .fade-out fragment-index=2}
@@ -487,7 +582,7 @@ How can we more clearly see the changes in the seasonal pattern over time?
 ::: callout-tip
 ## Remap the aesthetics
 
-Swap the x and colour aesthetic mappings to plot the years on the x-axis, with colours for each quarter.
+Swap the x and colour aesthetic mappings to plot linear time on the x-axis, with colours for each quarter.
 :::
 :::
 
@@ -498,59 +593,11 @@ aus_production |>
   model(STL(log(Gas))) |>
   components() |>
   ggplot(aes(
-    x = year(Quarter),
+    x = Quarter,
     y = season_year,
-    colour = paste0("Q", quarter(Quarter))
+    colour = format(Quarter, "Q{cyc(quarter, year)}")
   )) +
-  geom_line() +
-  labs(
-    x = "Time",
-    y = "Seasonality",
-    colour = "Quarter",
-    title = "Gas production in Australia"
-  )
-```
-
-
-::: {.fragment .fade-up fragment-index=1}
-::: callout-note
-Gas production in Q1 is increasing while Q3 is decreasing.
-:::
-:::
-
-:::
-:::
-
-![](../backgrounds/pruthvi-sagar-a-r-xxgNqAtIJ0s-unsplash.jpg){.image-right}
-
-## {.fragment-remove}
-
-::: columns
-
-::: {.column width="60%"}
-
-### Visualising seasonality
-
-::: {.fragment .fade-out fragment-index=1}
-::: callout-tip
-## Remap the aesthetics
-
-Swap the x and colour aesthetic mappings to plot the years on the x-axis, with colours for each quarter.
-:::
-:::
-
-```{r}
-#| echo: true
-#| code-fold: show
-aus_production |>
-  model(STL(log(Gas))) |>
-  components() |>
-  ggplot(aes(
-    x = year(Quarter),
-    y = season_year,
-    colour = paste0("Q", quarter(Quarter))
-  )) +
-  geom_line() +
+  geom_time_line() +
   labs(
     x = "Time",
     y = "Seasonality",
@@ -587,14 +634,16 @@ This produces a 'seasonal sub-series plot', which is useful for visualising chan
 
 ```{r}
 #| echo: true
+#| fig-height: 3.5
 #| code-fold: show
 aus_production |>
   model(STL(log(Gas))) |>
   components() |>
-  ggplot(aes(x = year(Quarter), y = season_year)) +
-  geom_line() +
-  facet_grid(cols = vars(paste0("Q", quarter(Quarter)))) +
-  labs(x = "Time", y = "Seasonality", title = "Gas production in Australia")
+  ggplot(aes(x = Quarter, y = season_year)) +
+  geom_time_line() +
+  facet_grid(
+    cols = vars(format(Quarter, "Q{cyc(quarter, year)}"))
+  )
 ```
 
 :::
@@ -616,7 +665,7 @@ aus_production |>
 ```{r}
 #| echo: true
 aus_production |>
-  gg_subseries(Gas, period = "1 year")
+  gg_subseries(Gas, period = years(1L))
 ```
 
 This plot is known as a **seasonal subseries plot**, which can be made quickly with the plot helper function `gg_subseries()`.
@@ -649,7 +698,7 @@ Seeing changes in seasonality when the data has trend, noise, and other patterns
 aus_production |>
   model(STL(log(Gas))) |>
   components() |>
-  gg_subseries(season_year, period = "1 year")
+  gg_subseries(season_year, period = years(1L))
 ```
 
 
@@ -707,7 +756,7 @@ pbs_scripts |>
 pbs_scripts |>
   model(STL(Scripts)) |>
   components() |>
-  gg_subseries(season_year, period = "1 year")
+  gg_subseries(season_year, period = years(1L))
 ```
 
 ::: {.fragment .fade-up}
@@ -736,7 +785,7 @@ They appear to be redistributed into Oct, Nov, and Jan.
 ### Recap of plotting time series
 
 * Time plots
-* Season plots
+* Season plots (`coord_loop()`)
 * Seasonal subseries plots
 
 :::
@@ -930,18 +979,54 @@ When aggregating time, you need to ensure the aggregation window has all necessa
 ```{r}
 #| echo: true
 #| fig-height: 4.5
-#| code-line-numbers: "3-4"
-vic_elec |>
-  index_by(Week = yearweek(Time)) |>
-  summarise(Demand = sum(Demand), n = length(Week)) |>
-  filter(n >= 2 * 24 * 7 - 2) |>
+#| code-line-numbers: "5-6"
+vic_daily <- vic_elec |>
+  index_by(Day = date(Time)) |>
+  summarise(Demand = sum(Demand))
+vic_weekly <- vic_daily |>
+  # Only days in weeks with all 7 days
+  filter(time_is_complete_at(Day, cal_isoweek$week)) |>
+  index_by(Week = yearweek(Day)) |>
+  summarise(Demand = sum(Demand))
+vic_weekly |>
   autoplot(Demand)
 ```
+
 
 :::
 :::
 
 ![](../backgrounds/aaron-burden-Qy-CBKUg_X8-unsplash.jpg){.image-right}
+
+## {}
+
+::: columns
+
+::: {.column width="60%"}
+
+### Temporal aggregation
+
+`stat_summary_time()` aggregates within the plot.
+
+```{r}
+#| echo: true
+#| fig-height: 3.5
+vic_daily |>
+  ggplot(aes(x = Day, y = Demand)) +
+  geom_time_line(colour = "grey60") +
+  stat_summary_time(
+    granule = weeks(1L), fun = mean,
+    colour = "steelblue", linewidth = 1
+  )
+```
+
+Incomplete weeks become `NA`.
+
+:::
+:::
+
+![](../backgrounds/aaron-burden-Qy-CBKUg_X8-unsplash.jpg){.image-right}
+
 
 ## {.fragment-remove}
 
@@ -954,12 +1039,18 @@ vic_elec |>
 ```{r}
 #| echo: true
 #| fig-height: 4.5
-vic_elec |>
-  index_by(Week = yearweek(Date)) |>
-  summarise(Demand = sum(Demand), n = length(Week)) |>
-  filter(n >= 2 * 24 * 7 - 2) |>
-  gg_season(Demand, period = "1 year")
+vic_weekly |>
+  gg_season(
+    Demand,
+    period = years(1L, calendar = cal_isoweek)
+  )
 ```
+
+::: callout-tip
+## Which year?
+
+Weeks can span two Gregorian years, so they loop around the ISO week calendar's years.
+:::
 
 :::
 :::
@@ -1001,11 +1092,15 @@ pedestrian |>
 #| echo: true
 pedestrian |>
   filter(Sensor == "Southern Cross Station") |>
-  index_by(Week = yearweek(Date_Time)) |>
-  summarise(Count = sum(Count), n = length(Week)) |>
-  filter(n >= 24 * 7 - 1) |>
-  fill_gaps() |>
-  gg_season(Count, period = "1 year")
+  index_by(Day = date(Date_Time)) |>
+  summarise(Count = sum(Count)) |>
+  filter(time_is_complete_at(Day, cal_isoweek$week)) |>
+  index_by(Week = yearweek(Day)) |>
+  summarise(Count = sum(Count)) |>
+  gg_season(
+    Count,
+    period = years(1L, calendar = cal_isoweek)
+  )
 ```
 
 
@@ -1026,7 +1121,7 @@ Since there doesn't appear to be (substantial) annual seasonality, we can use ag
 
 ::: callout-caution
 ## Your turn!
-Use the `Date` column with `index_by()` to aggregate to daily data, then use `gg_season()` to plot the weekly seasonal pattern.
+Use `date()` with `index_by()` to aggregate to daily data, then use `gg_season()` to plot the weekly seasonal pattern.
 
 Here's some code to start:
 
@@ -1036,7 +1131,7 @@ Here's some code to start:
 pedestrian |> 
   filter(Sensor == "Southern Cross Station") |> 
   index_by(???) |>
-  summarise(Count = sum(Count))
+  summarise(Count = sum(Count)) |>
   gg_season(???)
 ```
 
@@ -1060,9 +1155,9 @@ pedestrian |>
 #| echo: true
 pedestrian |>
   filter(Sensor == "Southern Cross Station") |>
-  index_by(Date) |>
+  index_by(Day = date(Date_Time)) |>
   summarise(Count = sum(Count)) |>
-  gg_season(Count, period = "1 week")
+  gg_season(Count, period = weeks(1L))
 ```
 
 
@@ -1113,7 +1208,7 @@ This is effective in combination with season plots to show seasonal patterns.
 ```{r}
 #| echo: true
 dcmp |>
-  gg_season(season_year, period = "1 year")
+  gg_season(season_year, period = years(1L))
 ```
 
 :::
@@ -1135,7 +1230,7 @@ This is effective in combination with season plots to show seasonal patterns.
 ```{r}
 #| echo: true
 dcmp |>
-  gg_season(season_week, period = "1 week")
+  gg_season(season_week, period = weeks(1L))
 ```
 
 :::
@@ -1157,7 +1252,11 @@ This is effective in combination with season plots to show seasonal patterns.
 ```{r}
 #| echo: true
 dcmp |>
-  gg_season(season_day, period = "1 day")
+  gg_season(season_day, period = days(1L)) +
+  scale_x_mixtime(
+    time_breaks = hours(6L),
+    time_labels = "{cyc(hour, day)}h"
+  )
 ```
 
 :::
@@ -1180,7 +1279,9 @@ Specific combinations of seasonal patterns can also be computed and plotted.
 ```{r}
 #| echo: true
 dcmp |>
-  gg_season(season_day + season_week, period = "1 week")
+  gg_season(
+    season_day + season_week, period = weeks(1L)
+  )
 ```
 :::
 
@@ -1240,7 +1341,7 @@ ped_dcmp |>
 ```{r}
 #| echo: true
 ped_dcmp |>
-  gg_season(season_year, period = "1 year")
+  gg_season(season_year, period = years(1L))
 ```
 
 :::
@@ -1259,7 +1360,7 @@ ped_dcmp |>
 ```{r}
 #| echo: true
 ped_dcmp |>
-  gg_season(season_week, period = "1 week")
+  gg_season(season_week, period = weeks(1L))
 ```
 
 ::: {.fragment .fade-up}
@@ -1286,7 +1387,11 @@ The weekly seasonal pattern interacts with the daily seasonal pattern, so the mo
 ```{r}
 #| echo: true
 ped_dcmp |>
-  gg_season(season_day, period = "1 day")
+  gg_season(season_day, period = days(1L)) +
+  scale_x_mixtime(
+    time_breaks = hours(6L),
+    time_labels = "{cyc(hour, day)}h"
+  )
 ```
 
 ::: callout-important
@@ -1313,7 +1418,7 @@ The weekly seasonal pattern interacts with the daily seasonal pattern, so the mo
 ::: callout-tip
 ## Interaction effects
 
-Combine interacting seasonalities and use facets to separate the interactions (e.g. weekday and weekend effects).
+Combine interacting seasonalities and use colour (or facets) to separate the interactions (e.g. weekday and weekend effects).
 :::
 
 ::: {.fragment .fade-out fragment-index=1}
@@ -1322,9 +1427,21 @@ Combine interacting seasonalities and use facets to separate the interactions (e
 #| echo: true
 #| eval: false
 ped_dcmp |>
-  mutate(Weekday = wday(Date_Time, week_start = 1) %in% 1:5) |>
-  gg_season(season_day + season_week, period = "1 day") +
-  facet_wrap(vars(Weekday))
+  as_tsibble() |>
+  mutate(
+    Weekday =
+      day_of_week(Date_Time) < day_of_week(6L)
+  ) |>
+  ggplot(aes(
+    x = Date_Time, y = season_day + season_week,
+    colour = Weekday, group = 1
+  )) +
+  geom_time_line(alpha = 0.2) +
+  coord_loop(time_loops = days(1L)) +
+  scale_x_mixtime(
+    time_breaks = hours(6L),
+    time_labels = "{cyc(hour, day)}h"
+  )
 ```
 :::
 
@@ -1332,10 +1449,23 @@ ped_dcmp |>
 ::: {.fragment .fade-up fragment-index=1}
 ```{r}
 #| echo: false
+#| fig-height: 4.5
 ped_dcmp |>
-  mutate(Weekday = wday(Date_Time, week_start = 1) %in% 1:5) |>
-  gg_season(season_day + season_week, period = "1 day") +
-  facet_wrap(vars(Weekday))
+  as_tsibble() |>
+  mutate(
+    Weekday =
+      day_of_week(Date_Time) < day_of_week(6L)
+  ) |>
+  ggplot(aes(
+    x = Date_Time, y = season_day + season_week,
+    colour = Weekday, group = 1
+  )) +
+  geom_time_line(alpha = 0.2) +
+  coord_loop(time_loops = days(1L)) +
+  scale_x_mixtime(
+    time_breaks = hours(6L),
+    time_labels = "{cyc(hour, day)}h"
+  )
 ```
 :::
 
@@ -1343,6 +1473,77 @@ ped_dcmp |>
 :::
 
 ![](../backgrounds/nao-takabayashi-dh_2ouVgIYY-unsplash.jpg){.image-right}
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Absolute and local time
+
+Sub-daily time is shown in absolute time.
+
+```{r}
+#| echo: true
+#| fig-height: 4
+dst <- vic_elec |>
+  filter(
+    date(Time) >= date("2012-03-31"),
+    date(Time) <= date("2012-04-02")
+  )
+dst |>
+  ggplot(aes(x = Time, y = Demand)) +
+  geom_time_line() +
+  scale_x_mixtime(time_breaks = days(1L))
+```
+
+Daylight saving ended at 3am on 1 April 2012.
+
+:::
+:::
+
+![](../backgrounds/estee-janssens-zni0zgb3bkQ-unsplash.jpg){.image-left}
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Absolute and local time
+
+Use `tz = NA` for local time, changes are dashed.
+
+```{r}
+#| echo: true
+#| fig-height: 4
+dst |>
+  ggplot(aes(x = Time, y = Demand)) +
+  geom_time_line() +
+  scale_x_mixtime(
+    time_breaks = days(1L),
+    time_chronon =
+      cal_gregorian$minute(30L, tz = NA)
+  )
+```
+
+::: {.fragment .fade-up}
+Local time aligns human behaviour, absolute time shows when events coincide.
+:::
+
+:::
+:::
+
+![](../backgrounds/estee-janssens-zni0zgb3bkQ-unsplash.jpg){.image-left}
 
 
 ## {}
@@ -1363,12 +1564,18 @@ This is especially useful to show calendar specific patterns such as holidays.
 ```{r}
 #| echo: true
 #| eval: false
-library(sugrrants)
 vic_elec |>
-  filter(Time < as.Date("2012-05-01")) |>
-  ggplot(aes(x = hms::as_hms(Time), y = Demand)) +
-  geom_line() +
-  facet_calendar(~Date, nrow = 2)
+  filter(
+    yearmonth(Time) <= yearmonth("2012 Apr")
+  ) |>
+  ggplot(aes(
+    x = Time, y = Demand,
+    colour = Holiday, group = 1
+  )) +
+  geom_time_line() +
+  coord_calendar(
+    rows = weeks(1L), cols = months(2L)
+  )
 ```
 
 :::
@@ -1388,14 +1595,13 @@ vic_elec |>
 
 ```{r}
 #| fig-height: 10
-library(sugrrants)
 vic_elec |>
-  filter(Time < as.Date("2012-05-01")) |>
-  ggplot(aes(x = hms::as_hms(Time), y = Demand)) +
-  geom_line() +
-  scale_x_time(breaks = c(9, 17), labels = c("9AM", "5PM")) +
-  facet_calendar(~Date, nrow = 2) +
-  labs(x = "Time")
+  filter(yearmonth(Time) <= yearmonth("2012 Apr")) |>
+  ggplot(aes(x = Time, y = Demand, colour = Holiday, group = 1)) +
+  geom_time_line() +
+  coord_calendar(rows = weeks(1L), cols = months(2L)) +
+  scale_y_continuous(breaks = NULL) +
+  theme(legend.position = "bottom")
 ```
 
 :::
@@ -1424,10 +1630,10 @@ Here's some code to get you started.
 #| eval: false
 pedestrian |> 
   filter(Sensor == "Southern Cross Station") |> 
-  filter(Date_Time < as.Date(???)) |> 
-  ggplot(aes(x = hms::as_hms(???), y = ???)) + 
-  geom_line() + 
-  facet_???(???)
+  filter(yearmonth(Date_Time) <= yearmonth(???)) |> 
+  ggplot(aes(x = ???, y = ???)) + 
+  geom_time_line() + 
+  coord_???(rows = ???, cols = ???)
 ```
 
 Can you see any holiday effects?
@@ -1452,11 +1658,11 @@ Can you see any holiday effects?
 #| fig-height: 8.5
 pedestrian |>
   filter(Sensor == "Southern Cross Station") |>
-  filter(Date_Time < as.Date("2015-05-01")) |>
-  ggplot(aes(x = hms::as_hms(Date_Time), y = Count)) +
-  geom_line() +
-  scale_x_time(breaks = c(9, 17), labels = c("9AM", "5PM")) +
-  facet_calendar(~Date) +
+  filter(yearmonth(Date_Time) <= yearmonth("2015 Apr")) |>
+  ggplot(aes(x = Date_Time, y = Count)) +
+  geom_time_line() +
+  coord_calendar(rows = weeks(1L), cols = months(2L)) +
+  scale_y_continuous(breaks = NULL) +
   labs(x = "Time", y = "Pedestrian count")
 ```
 
