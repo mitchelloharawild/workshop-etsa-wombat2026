@@ -10,6 +10,31 @@ webr:
   autoload-packages: false
 ---
 
+::: {.callout-note}
+## Setup
+
+These exercises use the development versions of `mixtime` and `ggtime`, so the code can't be run in this page. Run it in RStudio, after loading this setup code:
+
+```r
+library(fpp3)
+library(mixtime) # Load last
+
+# Use mixtime for the time index of each dataset
+tourism <- tourism |>
+  mutate(Quarter = yearquarter(Quarter))
+aus_production <- aus_production |>
+  mutate(Quarter = yearquarter(Quarter))
+PBS <- PBS |>
+  mutate(Month = yearmonth(Month))
+aus_retail <- aus_retail |>
+  mutate(Month = yearmonth(Month))
+vic_elec <- vic_elec |>
+  mutate(Time = mixtime(Time))
+pedestrian <- pedestrian |>
+  mutate(Date_Time = mixtime(Date_Time))
+```
+:::
+
 # Time series data and patterns
 
 ## Exercise 1
@@ -76,4 +101,463 @@ Identify the `index` variable, `key` variable(s), and measured variable(s) of th
 - [X] [Count]{hint="o"}
 :::
 :::
+:::
+
+## Exercise 2
+
+::: {.callout-caution}
+## Exercise 2
+
+Identify the `index` and `key` variables of the `aus_accommodation` dataset.
+
+Then use `as_tsibble()` to convert it into a tsibble.
+:::
+
+```r
+library(fpp3)
+read.csv(
+  "https://workshop.nectric.com.au/wombat2026/data/aus_accommodation.csv"
+)
+```
+
+::: {.callout-note collapse="true"}
+## Solution
+
+The `index` is `Date` and the `key` is `State`. `Date` is read as text, so parse it first.
+
+```r
+accommodation <- read.csv(
+  "https://workshop.nectric.com.au/wombat2026/data/aus_accommodation.csv"
+)
+accommodation |>
+  as_tibble() |>
+  mutate(Date = as.Date(Date)) |>
+  as_tsibble(index = Date, key = State)
+```
+:::
+
+## Exercise 3
+
+::: {.callout-caution}
+## Exercise 3
+
+Redo the previous exercise, but this time use the appropriate time class for the index variable.
+
+You should see the frequency of the tsibble matches the quarterly frequency of the measurements.
+:::
+
+::: {.callout-tip}
+## Hint
+
+Parse the text with `date()`, then use `yearquarter()`.
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```r
+accommodation |>
+  as_tibble() |>
+  mutate(Date = yearquarter(date(Date))) |>
+  as_tsibble(index = Date, key = State)
+```
+:::
+
+## Exercise 4
+
+::: {.callout-caution}
+## Exercise 4
+
+Try calculating the total tourists visiting Victoria from the `tourism` dataset.
+:::
+
+::: {.callout-tip}
+## Hint
+
+Use `filter()` to keep only visitors to "Victoria", then `summarise()` to calculate the total trips.
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```r
+tourism |>
+  filter(State == "Victoria") |>
+  summarise(Total_Trips = sum(Trips))
+```
+:::
+
+## Exercise 5
+
+::: {.callout-caution}
+## Exercise 5
+
+Visualise and describe the temporal patterns of visitors to Victoria in the `tourism` dataset.
+
+Here's some code to get you started:
+:::
+
+```r
+vic_tourism <- tourism |>
+  filter(State == "Victoria") |>
+  summarise(Trips = sum(Trips))
+vic_tourism |>
+  autoplot(Trips)
+```
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```r
+vic_tourism <- tourism |>
+  filter(State == "Victoria") |>
+  summarise(Trips = sum(Trips))
+vic_tourism |>
+  autoplot(Trips)
+```
+
+There is a strong seasonal pattern (peaking in Q1 and lowest in Q2 and Q3), a slight trend, and no clear cycles.
+:::
+
+## Exercise 6
+
+::: {.callout-caution}
+## Exercise 6
+
+Decompose the cost of antidiabetic scripts, then plot its components and the seasonally adjusted series.
+:::
+
+```r
+a10 <- PBS |>
+  filter(ATC2 == "A10") |>
+  summarise(Cost = sum(Cost) / 1e6)
+a10_dcmp <- a10 |>
+  model(STL(???)) |>
+  components()
+
+# Plot the components
+a10_dcmp |> ???
+
+# Plot the seasonally adjusted data
+as_tsibble(a10_dcmp) |> autoplot(???)
+```
+
+::: {.callout-tip}
+## Hint
+
+Are the patterns additive or multiplicative?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```r
+a10 <- PBS |>
+  filter(ATC2 == "A10") |>
+  summarise(Cost = sum(Cost) / 1e6)
+a10_dcmp <- a10 |>
+  model(STL(log(Cost))) |>
+  components()
+
+# Plot the components
+a10_dcmp |> autoplot()
+
+# Plot the seasonally adjusted data
+as_tsibble(a10_dcmp) |>
+  autoplot(exp(season_adjust)) +
+  labs(y = "Cost ($ millions)")
+```
+
+`log()` makes the patterns additive, and `exp()` returns the seasonally adjusted series to dollars.
+:::
+
+## Exercise 7
+
+::: {.callout-caution}
+## Exercise 7
+
+Find and plot the three most seasonal series.
+
+*Extension: which series have the strongest trend?*
+:::
+
+```r
+tourism |>
+  features(???, ???) |>
+  slice_max(???, n = 3) |>
+  inner_join(x = tourism, y = _,
+    by = join_by(Region, State, Purpose)) |>
+  ggplot(aes(x = ???, y = ???)) +
+  geom_time_line() +
+  facet_grid(vars(Region, State, Purpose),
+    scales = "free_y")
+```
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```r
+tourism |>
+  features(Trips, feat_stl) |>
+  slice_max(seasonal_strength_year, n = 3) |>
+  inner_join(x = tourism, y = _,
+    by = join_by(Region, State, Purpose)) |>
+  ggplot(aes(x = Quarter, y = Trips)) +
+  geom_time_line() +
+  facet_grid(vars(Region, State, Purpose),
+    scales = "free_y")
+```
+
+For the extension, use `trend_strength` in `slice_max()`.
+:::
+
+# Seasonality and calendars
+
+## Exercise 8
+
+::: {.callout-caution}
+## Exercise 8
+
+Loop the time axis of this plot with `coord_loop()`.
+:::
+
+```r
+pbs_scripts <- PBS |>
+  summarise(Scripts = sum(Scripts))
+pbs_scripts |>
+  ggplot(aes(x = Month, y = Scripts)) +
+  geom_time_line() +
+  coord_loop(time_loops = ???)
+```
+
+::: {.callout-tip}
+## Hint
+
+`time_loops` is a mixtime duration, such as `weeks(2L)` for a fortnight.
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```r
+pbs_scripts |>
+  ggplot(aes(x = Month, y = Scripts)) +
+  geom_time_line() +
+  coord_loop(time_loops = years(1L))
+```
+:::
+
+## Exercise 9
+
+::: {.callout-caution}
+## Exercise 9
+
+Describe the shape of the seasonal pattern.
+
+When are the most scripts (the peak) and the least scripts (the trough) issued?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+Scripts peak in December and are lowest in February. Check the shape with a season plot:
+
+```r
+pbs_scripts |>
+  gg_season(Scripts, period = years(1L))
+```
+:::
+
+## Exercise 10
+
+::: {.callout-caution}
+## Exercise 10
+
+Plot the shape of the seasonal pattern, in which quarter does Australia produce the most and least gas?
+:::
+
+```r
+aus_production |>
+  autoplot(Gas)
+```
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```r
+aus_production |>
+  gg_season(Gas, period = years(1L))
+```
+
+Peak production is in Q3, with a trough in Q1. Seasonality is getting stronger recently.
+:::
+
+## Exercise 11
+
+::: {.callout-caution}
+## Exercise 11
+
+Is the seasonal pattern in the total subsidised prescriptions (`Scripts`) in Australia changing over time?
+:::
+
+```r
+pbs_scripts <- PBS |>
+  summarise(Scripts = sum(Scripts))
+pbs_scripts |>
+  autoplot(Scripts)
+```
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```r
+pbs_scripts |>
+  model(STL(Scripts)) |>
+  components() |>
+  gg_subseries(season_year, period = years(1L))
+```
+
+The number of scripts in December is dropping rapidly. They appear to be redistributed into Oct, Nov, and Jan.
+:::
+
+## Exercise 12
+
+::: {.callout-caution}
+## Exercise 12
+
+Use `date()` with `index_by()` to aggregate to daily data, then use `gg_season()` to plot the weekly seasonal pattern.
+:::
+
+```r
+pedestrian |>
+  filter(Sensor == "Southern Cross Station") |>
+  index_by(???) |>
+  summarise(Count = sum(Count)) |>
+  gg_season(???)
+```
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```r
+pedestrian |>
+  filter(Sensor == "Southern Cross Station") |>
+  index_by(Day = date(Date_Time)) |>
+  summarise(Count = sum(Count)) |>
+  gg_season(Count, period = weeks(1L))
+```
+:::
+
+## Exercise 13
+
+::: {.callout-caution}
+## Exercise 13
+
+Create a calendar plot for the first few months of pedestrians at Southern Cross Station.
+
+Can you see any holiday effects?
+:::
+
+```r
+pedestrian |>
+  filter(Sensor == "Southern Cross Station") |>
+  filter(yearmonth(Date_Time) <= yearmonth(???)) |>
+  ggplot(aes(x = ???, y = ???)) +
+  geom_time_line() +
+  coord_???(rows = ???, cols = ???)
+```
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```r
+pedestrian |>
+  filter(Sensor == "Southern Cross Station") |>
+  filter(yearmonth(Date_Time) <= yearmonth("2015 Apr")) |>
+  ggplot(aes(x = Date_Time, y = Count)) +
+  geom_time_line() +
+  coord_calendar(rows = weeks(1L), cols = months(2L)) +
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "Time", y = "Pedestrian count")
+```
+
+Holidays (such as Easter and Anzac Day) have much lower counts.
+:::
+
+## Exercise 14
+
+::: {.callout-caution}
+## Exercise 14
+
+Use an STL decomposition and `gg_season()` to clearly show the seasonal patterns in pedestrian traffic.
+:::
+
+```r
+ped_dcmp <- pedestrian |>
+  filter(Sensor == "Southern Cross Station") |>
+  fill_gaps(Count = 0) |>
+  model(STL(Count)) |>
+  components()
+ped_dcmp |>
+  autoplot()
+```
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```r
+ped_dcmp |>
+  gg_season(season_year, period = years(1L))
+ped_dcmp |>
+  gg_season(season_week, period = weeks(1L))
+```
+
+The weekly seasonal pattern interacts with the daily seasonal pattern, so the model doesn't work here. STL is additive, so interactions between different seasonalities are not captured.
+:::
+
+## Exercise 15
+
+::: {.callout-caution}
+## Exercise 15
+
+Use features to find an interesting series in `tourism` (e.g. strongly seasonal, or an unusual peak).
+
+Plot its seasonality, then explain what you see. Is the pattern changing over time?
+:::
+
+```r
+tourism |>
+  features(Trips, feat_stl) |>
+  filter(
+    seasonal_strength_year > ???,
+    format(seasonal_peak_year) == ???
+  )
+
+tourism |>
+  filter(Region == ???, Purpose == ???) |>
+  gg_season(Trips, period = ???)
+```
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```r
+# Which strongly seasonal series peak in Q2?
+tourism |>
+  features(Trips, feat_stl) |>
+  filter(
+    seasonal_strength_year > 0.6,
+    format(seasonal_peak_year) == "Q2"
+  ) |>
+  select(Region, Purpose, seasonal_peak_year)
+
+tourism |>
+  filter(Region == "Blue Mountains") |>
+  filter(Purpose == "Holiday") |>
+  model(STL(Trips)) |>
+  components() |>
+  gg_subseries(season_year, period = years(1L))
+```
+
+The Q2 peak (autumn, Easter?) is growing since 2010. Q4 is weakening, and is now the trough.
 :::
