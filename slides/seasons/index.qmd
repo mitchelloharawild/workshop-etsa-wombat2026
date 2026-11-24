@@ -2038,6 +2038,36 @@ Q4 is weakening, and is now the trough.
 ![](../backgrounds/autumn-mott-rodeheaver-SPd9CSoWCkY-unsplash.jpg){.image-left}
 
 
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Which tool for which question?
+
+::: {style="font-size: 0.75em;"}
+
+| Question | Tool |
+|:---------|:-----|
+| What patterns are there? | Time plot |
+| What shape is the seasonality? | Season plot (`coord_loop()`) |
+| Is the seasonality changing? | Seasonal subseries plot |
+| Are holidays different? | Calendar plot |
+| Is it trend or seasonality? | STL decomposition |
+| Which series are interesting? | Features |
+
+:::
+
+:::
+:::
+
+![](../backgrounds/autumn-mott-rodeheaver-SPd9CSoWCkY-unsplash.jpg){.image-left}
+
+
 ## That's all we have time for!
 
 ::: columns
