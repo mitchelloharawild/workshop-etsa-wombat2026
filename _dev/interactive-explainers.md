@@ -129,8 +129,8 @@ Fix 2 also applies to AFRICAST, if it is ever used with monthly data.
 | Slide | Poll | Answer |
 |---|---|---|
 | "Hi, who are you?" | Hands up list as a multiple choice poll | – |
-| Seasonal or cyclical? (×4: deaths, lynx, sunspots, beer) | Seasonal / Cyclical / Both / Neither | Seasonal, Cyclical, Cyclical, Seasonal |
-| Additive or multiplicative? (×2) | Additive / Multiplicative | Additive, Multiplicative |
+| Seasonal or cyclical? (×4: deaths, lynx, bricks, amazon) | Seasonal / Cyclical / Both / Neither | Seasonal, Cyclical, Both, Neither |
+| Additive or multiplicative? (retail) | Additive / Multiplicative | Multiplicative |
 | "Describe the shape" (Scripts) | Which month has the fewest scripts? | February |
 
 * Reveal results after discussion (`results: hidden`), so early votes don't lead
