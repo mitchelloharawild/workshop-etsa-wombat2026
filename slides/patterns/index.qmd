@@ -19,7 +19,9 @@ editor_options:
 
 ```{r}
 #| include: false
+#| cache: false
 library(fpp3)
+library(mixtime)
 ```
 
 ## {}
@@ -209,6 +211,7 @@ We'll be using these packages!
 :::{.hextile .clr}
 * ![](resources/tsibble.png)
 * ![](resources/mixtime.svg)
+* ![](resources/ggtime.svg)
 * ![](resources/feasts.svg)
 * ![](resources/tsibbledata.svg)
 * ![](resources/tidyverse.svg)
@@ -239,8 +242,8 @@ Install them with:
 # The tidy forecasting packages
 install.packages("fpp3")
 
-# Calendar visualisation layouts
-install.packages("sugrrants")
+# Time classes, time graphics, and features
+install.packages(c("mixtime", "ggtime", "feasts"))
 ```
 
 :::
@@ -260,16 +263,16 @@ install.packages("sugrrants")
 library(dplyr)
 # Plotting functions
 library(ggplot2)
-# Manipulate time
-library(lubridate)
 # Time series class
 library(tsibble)
 # Tidy time series datasets
 library(tsibbledata)
 # Feature extraction and statistics
 library(feasts)
-# Time series calendar graphics
-library(sugrrants)
+# Grammar of time series graphics
+library(ggtime)
+# Semantic time vectors
+library(mixtime)
 ```
 ::: {.fragment .fade-in}
 
@@ -277,8 +280,14 @@ library(sugrrants)
 ```r
 # All of the above
 library(fpp3)
-library(sugrrants)
+library(mixtime)
 ```
+
+:::{.callout-important}
+## Load mixtime last
+
+It replaces tsibble and lubridate functions like `yearmonth()` and `year()`.
+:::
 :::
 
 
@@ -553,21 +562,227 @@ Time is surprisingly tricky to represent!
 
 ![](resources/mixtime.svg){.sticker-float-right}
 
-Common time points can be created with these functions:
-
 ```{r}
 tribble(
   ~`Granularity`, ~Function,
-  "Annual", "`start:end`",
+  "Annual", "`year()`",
   "Quarterly", "`yearquarter()`",
   "Monthly", "`yearmonth()`",
   "Weekly", "`yearweek()`",
-  "Daily", "`as_date()`, `ymd()`",
-  "Sub-daily", "`as_datetime()`"
+  "Daily", "`date()`",
+  "Sub-daily", "`mixtime()`"
 ) |>
   knitr::kable(booktabs = TRUE)
 ```
 
+:::{.callout-tip}
+## Sub-daily granularity
+
+`mixtime()` finds the granularity (e.g. 30 minutes), `datetime()` uses seconds.
+:::
+
+
+:::
+:::
+
+![](../backgrounds/jon-tyson-FlHdnPO6dlw-unsplash.jpg){.image-left}
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Time arithmetic
+
+![](resources/mixtime.svg){.sticker-float-right}
+
+Numbers shift time by its granularity:
+
+```{r}
+#| echo: true
+yearmonth("2026 Nov") + 0:2
+```
+
+Durations shift by calendar units:
+
+```{r}
+#| echo: true
+date("2026-01-31") + months(1L)
+```
+
+::: {.fragment .fade-up}
+Differences are durations too:
+
+```{r}
+#| echo: true
+date("2026-12-25") - date("2026-11-30")
+```
+:::
+
+:::
+:::
+
+![](../backgrounds/jon-tyson-FlHdnPO6dlw-unsplash.jpg){.image-left}
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Linear and cyclical time
+
+Linear time moves forward, cyclical time repeats.
+
+```{r}
+#| echo: true
+today <- date("2026-11-30")
+yearmonth(today)
+month_of_year(today)
+day_of_week(today)
+```
+
+::: {.fragment .fade-up}
+Cyclical time is useful for finding specific seasons.
+
+```{r}
+#| echo: true
+# Is it a weekday? (Saturday is day 6)
+day_of_week(today) < day_of_week(6L)
+```
+:::
+
+:::
+:::
+
+![](../backgrounds/jon-tyson-FlHdnPO6dlw-unsplash.jpg){.image-left}
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Mixing granularities
+
+Time of different granularities can be combined...
+
+```{r}
+#| echo: true
+c(
+  year(2026L), yearmonth("2026 Nov"),
+  date("2026-11-30")
+)
+```
+
+::: {.fragment .fade-up}
+... but only converted when the result is certain.
+
+```{r}
+#| echo: true
+year(yearmonth("2026 Nov"))
+```
+
+```{r}
+#| echo: true
+#| error: true
+# Weeks can span two months!
+yearmonth(yearweek(date("2026-11-30")))
+```
+:::
+
+:::
+:::
+
+![](../backgrounds/jon-tyson-FlHdnPO6dlw-unsplash.jpg){.image-left}
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Time zones
+
+Local time repeats when daylight saving ends.
+
+```{r}
+#| echo: true
+x <- datetime(
+  "2026-04-05 01:30:00",
+  tz = "Australia/Melbourne"
+)
+x + hours(1:2)
+```
+
+::: {.fragment .fade-up}
+A day isn't always 24 hours!
+
+```{r}
+#| echo: true
+x + days(1L)
+x + hours(24L)
+```
+:::
+
+:::
+:::
+
+![](../backgrounds/jon-tyson-FlHdnPO6dlw-unsplash.jpg){.image-left}
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Using mixtime with tsibble
+
+mixtime vectors can be the index of a tsibble.
+
+Let's update the datasets used in this workshop.
+
+```{r}
+#| echo: true
+tourism <- tourism |>
+  mutate(Quarter = yearquarter(Quarter))
+aus_production <- aus_production |>
+  mutate(Quarter = yearquarter(Quarter))
+PBS <- PBS |>
+  mutate(Month = yearmonth(Month))
+aus_retail <- aus_retail |>
+  mutate(Month = yearmonth(Month))
+vic_elec <- vic_elec |>
+  mutate(Time = mixtime(Time))
+pedestrian <- pedestrian |>
+  mutate(Date_Time = mixtime(Date_Time))
+```
+
+```{r}
+#| echo: true
+interval(vic_elec)
+```
 
 :::
 :::
@@ -588,7 +803,7 @@ tribble(
 
 1. Tidy the data into a long format
 2. Appropriately class the time variable
-3. Convert to tsibble with `as_tibble()`, identifying the `index` and `key` variable(s).
+3. Convert to tsibble with `as_tsibble()`, identifying the `index` and `key` variable(s).
 
 ::: {.callout-caution}
 ## Follow along
@@ -599,10 +814,13 @@ Let's convert the tourism dataset into a tsibble.
 #| eval: false
 #| echo: true
 library(fpp3)
+library(mixtime)
 read.csv(
   "https://workshop.nectric.com.au/wombat2026/data/tourism.csv"
 )
 ```
+
+*Hint: parse text with `date()`, then use `yearquarter()`.*
 
 :::
 
@@ -626,7 +844,7 @@ read.csv(
 
 1. Tidy the data into a long format
 2. Appropriately class the time variable
-3. Convert to tsibble with `as_tibble()`, identifying the `index` and `key` variable(s).
+3. Convert to tsibble with `as_tsibble()`, identifying the `index` and `key` variable(s).
 
 ::: {.callout-caution}
 ## Exercise 3
@@ -699,6 +917,36 @@ To re-index by a new variable, use `index_by()`.
 
 ::: columns
 
+::: {.column width="60%"}
+
+### Temporal aggregation
+
+```{r}
+#| echo: true
+aus_gas_annual <- aus_production |>
+  index_by(Year = year(Quarter)) |>
+  summarise(Gas = mean(Gas))
+print(aus_gas_annual, n = 4)
+```
+
+::: {.fragment .fade-up}
+::: {.callout-important}
+## Complete years only?
+
+`time_is_complete_at(Quarter, cal_gregorian$year)` finds which observations are in years with all four quarters.
+:::
+:::
+
+:::
+:::
+
+![](../backgrounds/randy-fath-R5_1N6ZgCOo-unsplash.jpg){.image-right}
+
+
+## {}
+
+::: columns
+
 ::: {.column width="40%"}
 :::
 
@@ -717,8 +965,6 @@ These patterns include:
 * events
 
 They also help identify anomalies/outliers.
-
-:::
 
 :::
 :::
@@ -751,6 +997,39 @@ pbs_scripts |>
 :::
 
 ![](../backgrounds/nathan-dumlao-5Hl5reICevY-unsplash.jpg){.image-left}
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Time plots of mixed granularities
+
+`stat_summary_time()` aggregates in the plot.
+
+```{r}
+#| echo: true
+#| fig-height: 3.5
+aus_production |>
+  ggplot(aes(x = Quarter, y = Gas)) +
+  geom_time_line(colour = "grey60") +
+  stat_summary_time(
+    granule = years(1L), fun = mean,
+    colour = "steelblue", linewidth = 1
+  )
+```
+
+Incomplete years (2010) become `NA`.
+
+:::
+:::
+
+![](../backgrounds/nathan-dumlao-5Hl5reICevY-unsplash.jpg){.image-left}
+
 
 <!-- ## {} -->
 
@@ -817,7 +1096,7 @@ pbs_scripts |>
 
 ### ACF plots
 
-An ACF plot shows autocorrelations (lagged relationships). This helps to identify trends, seasons and cycles.
+An ACF plot shows autocorrelations (lagged relationships). This helps to identify trends, seasons and cycles. Lags are durations (e.g. 12 months).
 
 ```{r}
 #| echo: true
@@ -830,6 +1109,31 @@ pbs_scripts |>
 :::
 
 ![](../backgrounds/nathan-dumlao-5Hl5reICevY-unsplash.jpg){.image-left}
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### Lag plots
+
+A lag plot shows the relationship behind each autocorrelation, coloured by season.
+
+```{r}
+#| echo: true
+aus_production |>
+  gg_lag(Gas, geom = "point", period = years(1L))
+```
+
+:::
+:::
+
+![](../backgrounds/nathan-dumlao-5Hl5reICevY-unsplash.jpg){.image-left}
+
 
 ## {}
 
@@ -896,7 +1200,8 @@ These common patterns are commonly confused, can you tell them apart?
 
 ```{r}
 library(patchwork)
-(autoplot(as_tsibble(USAccDeaths), value)+ylab(NULL))/autoplot(ACF(as_tsibble(USAccDeaths), value))
+deaths <- as_tsibble(USAccDeaths) |> mutate(index = yearmonth(index))
+(autoplot(deaths, value)+ylab(NULL))/autoplot(ACF(deaths, value))
 ```
 
 ## {}
@@ -907,7 +1212,8 @@ These common patterns are commonly confused, can you tell them apart?
 
 ```{r}
 library(patchwork)
-(autoplot(pelt, Lynx)+ylab(NULL))/autoplot(ACF(pelt, Lynx))
+lynx_pelt <- pelt |> mutate(Year = year(as.integer(Year)))
+(autoplot(lynx_pelt, Lynx)+ylab(NULL))/autoplot(ACF(lynx_pelt, Lynx))
 ```
 
 ## {}
@@ -918,7 +1224,8 @@ These common patterns are commonly confused, can you tell them apart?
 
 ```{r}
 library(patchwork)
-(autoplot(as_tsibble(sunspot.year), value)+ylab(NULL))/autoplot(ACF(as_tsibble(sunspot.year), value))
+sunspots <- as_tsibble(sunspot.year) |> mutate(index = year(as.integer(index)))
+(autoplot(sunspots, value)+ylab(NULL))/autoplot(ACF(sunspots, value))
 ```
 
 ## {}
@@ -976,7 +1283,7 @@ library(ggplot2)
 
 i <- 1:119
 pattern_types_demo <- tsibble(
-  time = yearmonth(i),
+  time = yearmonth("2000 Jan") + i,
   season = sin(i*2*pi/12),
   trend = i,
   remainder = rnorm(length(i)),
@@ -985,7 +1292,7 @@ pattern_types_demo <- tsibble(
 pattern_types_demo |> 
   tidyr::pivot_longer(c(season, trend, remainder)) |> 
   ggplot(aes(x = time, y = value, group = name)) +
-  geom_line() +
+  geom_time_line() +
   facet_grid(vars(name), scales = "free_y") + 
   labs(x = NULL, y = NULL)
 ```
@@ -1245,8 +1552,8 @@ Adjusted data is in the `season_adjust` column.
 ```{r}
 as_tsibble(dcmp) |> 
   autoplot(Trips, colour = "#aeaeae") + 
-  geom_line(aes(y = trend), colour = "steelblue") +
-  geom_line(aes(y = season_adjust), colour = "hotpink")
+  geom_time_line(aes(y = trend), colour = "steelblue") +
+  geom_time_line(aes(y = season_adjust), colour = "hotpink")
 ```
 
 
@@ -1295,7 +1602,7 @@ This can make visualising the patterns of each time series challenging.
 ```{r}
 #| echo: true
 tourism |> 
-  autoplot() + 
+  autoplot(Trips) + 
   guides(colour = "none")
 ```
 
@@ -1402,7 +1709,7 @@ tourism |>
   features(Trips, feat_stl) |>
   slice_max(seasonal_strength_year, n = 3) |> 
   inner_join(x = tourism, y = _, by = join_by(Region, State, Purpose)) |> 
-  ggplot(aes(x = Quarter, y = Trips)) + geom_line() + 
+  ggplot(aes(x = Quarter, y = Trips)) + geom_time_line() + 
   facet_grid(vars(Region, State, Purpose), scales = "free_y")
 ```
 
@@ -1427,7 +1734,7 @@ tourism |>
   features(Trips, feat_stl) |>
   slice_max(trend_strength, n = 3) |> 
   inner_join(x = tourism, y = _, by = join_by(Region, State, Purpose)) |> 
-  ggplot(aes(x = Quarter, y = Trips)) + geom_line() + 
+  ggplot(aes(x = Quarter, y = Trips)) + geom_time_line() + 
   facet_grid(vars(Region, State, Purpose), scales = "free_y")
 ```
 
@@ -1435,6 +1742,99 @@ tourism |>
 :::
 
 ![](../backgrounds/jon-tyson-FlHdnPO6dlw-unsplash.jpg){.image-left}
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### When is the peak season?
+
+Seasonal peaks and troughs are cyclical time.
+
+```{r}
+#| echo: true
+tourism |>
+  features(Trips, feat_stl) |>
+  select(
+    Purpose,
+    Peak = seasonal_peak_year,
+    Trough = seasonal_trough_year
+  ) |>
+  print(n = 4)
+```
+
+:::
+:::
+
+![](../backgrounds/jon-tyson-FlHdnPO6dlw-unsplash.jpg){.image-left}
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### When is the peak season?
+
+```{r}
+#| echo: true
+#| fig-height: 5
+tourism |>
+  features(Trips, feat_stl) |>
+  filter(seasonal_strength_year > 0.6) |>
+  ggplot(aes(
+    x = format(seasonal_peak_year), fill = Purpose
+  )) +
+  geom_bar() +
+  labs(x = "Peak quarter", y = "Number of series")
+```
+
+:::
+:::
+
+![](../backgrounds/jon-tyson-FlHdnPO6dlw-unsplash.jpg){.image-left}
+
+
+## {}
+
+::: columns
+
+::: {.column width="40%"}
+:::
+
+::: {.column width="60%"}
+
+### When did the level change?
+
+Shift features give the time of the largest change.
+
+```{r}
+#| echo: true
+PBS |>
+  summarise(Scripts = sum(Scripts)) |>
+  features(Scripts, shift_level_max)
+```
+
+::: {.callout-tip .fragment}
+## More shifts
+
+`shift_var_max()` finds changes in variance, and `shift_kl_max()` finds changes in distribution.
+:::
+
+:::
+:::
+
+![](../backgrounds/jon-tyson-FlHdnPO6dlw-unsplash.jpg){.image-left}
+
 
 ## {}
 
