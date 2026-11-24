@@ -168,6 +168,7 @@ Creating a time plot with `autoplot()` is quick and easy. A time plot can also b
 
 ```{r}
 #| echo: true
+#| fig-height: 4.4
 pbs_scripts |>
   ggplot(aes(x = Month, y = Scripts)) +
   geom_time_line()
@@ -193,6 +194,7 @@ Axis breaks use durations, and labels use calendar components.
 
 ```{r}
 #| echo: true
+#| fig-height: 3.2
 pbs_scripts |>
   ggplot(aes(x = Month, y = Scripts)) +
   geom_time_line() +
@@ -202,7 +204,7 @@ pbs_scripts |>
   )
 ```
 
-`lin()` is linear time, `cyc()` is cyclical time (e.g. `{cyc(month, year)}`).
+`lin()` is linear and `cyc()` is cyclical time.
 
 :::
 :::
@@ -455,11 +457,13 @@ Looped time can also be drawn around a circle.
 
 ```{r}
 #| echo: true
+#| fig-height: 4.5
 pbs_scripts |>
   ggplot(aes(x = Month, y = Scripts)) +
   geom_time_line() +
   coord_loop(
-    time_loops = years(1L), coord = coord_radial()
+    time_loops = years(1L),
+    coord = coord_radial()
   )
 ```
 
@@ -756,11 +760,31 @@ How can we more clearly see the changes in the seasonal pattern over time?
 
 Swap the x and colour aesthetic mappings to plot linear time on the x-axis, with colours for each quarter.
 :::
-:::
 
 ```{r}
 #| echo: true
-#| code-fold: show
+#| eval: false
+aus_production |>
+  model(STL(log(Gas))) |>
+  components() |>
+  ggplot(aes(
+    x = Quarter,
+    y = season_year,
+    colour =
+      format(Quarter, "Q{cyc(quarter, year)}")
+  )) +
+  geom_time_line() +
+  labs(
+    x = "Time",
+    y = "Seasonality",
+    colour = "Quarter",
+    title = "Gas production in Australia"
+  )
+```
+:::
+
+::: {.fragment .fade-up fragment-index=1}
+```{r}
 aus_production |>
   model(STL(log(Gas))) |>
   components() |>
@@ -778,8 +802,6 @@ aus_production |>
   )
 ```
 
-
-::: {.fragment .fade-up fragment-index=1}
 ::: callout-note
 Gas production in Q1 is increasing while Q3 is decreasing.
 :::
@@ -849,20 +871,21 @@ Add the mean of each quarter: the seasonal subseries plot.
 ::: callout-tip
 ## Facet by season
 
-This produces a 'seasonal sub-series plot', which is useful for visualising changes in seasonality over time.
+A 'seasonal sub-series plot' shows changing seasonality.
 :::
 
 ```{r}
 #| echo: true
-#| fig-height: 3.5
-#| code-fold: show
+#| fig-height: 2.7
 aus_production |>
   model(STL(log(Gas))) |>
   components() |>
   ggplot(aes(x = Quarter, y = season_year)) +
   geom_time_line() +
   facet_grid(
-    cols = vars(format(Quarter, "Q{cyc(quarter, year)}"))
+    cols = vars(
+      format(Quarter, "Q{cyc(quarter, year)}")
+    )
   )
 ```
 
@@ -914,7 +937,7 @@ Seeing changes in seasonality when the data has trend, noise, and other patterns
 
 ```{r}
 #| echo: true
-#| fig-height: 4.5
+#| fig-height: 4.2
 aus_production |>
   model(STL(log(Gas))) |>
   components() |>
@@ -1160,11 +1183,9 @@ The Victorian electricity demand data has three seasonal patterns:
 * Weekly (work)
 * Daily (sleep)
 
-The original data has a 30 minute frequency.
-
 ```{r}
 #| echo: true
-vic_elec
+vic_elec |> select(-Date) |> print(n = 3)
 ```
 
 :::
@@ -1274,7 +1295,7 @@ Days first: applying `time_is_complete_at()` to half-hours also drops the weeks 
 
 ```{r}
 #| echo: true
-#| fig-height: 3.5
+#| fig-height: 3
 vic_daily |>
   ggplot(aes(x = Day, y = Demand)) +
   geom_time_line(colour = "grey60") +
@@ -1302,7 +1323,7 @@ Incomplete weeks become `NA`.
 
 ```{r}
 #| echo: true
-#| fig-height: 4.5
+#| fig-height: 4
 vic_weekly |>
   gg_season(
     Demand,
@@ -1354,6 +1375,7 @@ pedestrian |>
 
 ```{r}
 #| echo: true
+#| fig-height: 4.4
 pedestrian |>
   filter(Sensor == "Southern Cross Station") |>
   index_by(Day = date(Date_Time)) |>
@@ -1483,7 +1505,7 @@ Sub-daily time is shown in absolute time.
 
 ```{r}
 #| echo: true
-#| fig-height: 4
+#| fig-height: 3
 dst <- vic_elec |>
   filter(
     date(Time) >= date("2012-03-31"),
@@ -1503,7 +1525,7 @@ Daylight saving ended at 3am on 1 April 2012.
 ![](../backgrounds/estee-janssens-zni0zgb3bkQ-unsplash.jpg){.image-left}
 
 
-## {}
+## {.fragment-remove}
 
 ::: columns
 
@@ -1514,11 +1536,13 @@ Daylight saving ended at 3am on 1 April 2012.
 
 ### Absolute and local time
 
+::: {.fragment .fade-out fragment-index=1}
 Use `tz = NA` for local time, changes are dashed.
+:::
 
 ```{r}
 #| echo: true
-#| fig-height: 4
+#| fig-height: 3.2
 dst |>
   ggplot(aes(x = Time, y = Demand)) +
   geom_time_line() +
@@ -1529,7 +1553,7 @@ dst |>
   )
 ```
 
-::: {.fragment .fade-up}
+::: {.fragment .fade-up fragment-index=1}
 Local time aligns human behaviour, absolute time shows when events coincide.
 :::
 
@@ -1645,9 +1669,29 @@ Can you see any holiday effects?
 
 ::: {.column width="60%"}
 
+### Calendar plots
+
+::: {.fragment .fade-out fragment-index=1}
 ```{r}
 #| echo: true
-#| code-fold: show
+#| eval: false
+pedestrian |>
+  filter(Sensor == "Southern Cross Station") |>
+  filter(
+    yearmonth(Date_Time) <= yearmonth("2015 Apr")
+  ) |>
+  ggplot(aes(x = Date_Time, y = Count)) +
+  geom_time_line() +
+  coord_calendar(
+    rows = weeks(1L), cols = months(2L)
+  ) +
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "Time", y = "Pedestrian count")
+```
+:::
+
+::: {.fragment .fade-up fragment-index=1}
+```{r}
 #| fig-height: 8.5
 pedestrian |>
   filter(Sensor == "Southern Cross Station") |>
@@ -1658,6 +1702,7 @@ pedestrian |>
   scale_y_continuous(breaks = NULL) +
   labs(x = "Time", y = "Pedestrian count")
 ```
+:::
 
 :::
 :::
@@ -1677,7 +1722,7 @@ The STL model can also decompose multiple seasonalities.
 
 ```{r}
 #| echo: true
-#| fig-height: 4.5
+#| fig-height: 3.5
 dcmp <- vic_elec |>
   model(STL(
     log(Demand) ~ season(period = "year") +
@@ -1750,6 +1795,7 @@ This is effective in combination with season plots to show seasonal patterns.
 
 ```{r}
 #| echo: true
+#| fig-height: 4.8
 dcmp |>
   gg_season(season_day, period = days(1L)) +
   scale_x_mixtime(
@@ -1812,6 +1858,7 @@ Use an STL decomposition and `gg_season()` to clearly show the seasonal patterns
 
 ```{r}
 #| echo: true
+#| fig-height: 4.7
 ped_dcmp <- pedestrian |>
   filter(Sensor == "Southern Cross Station") |>
   fill_gaps(Count = 0) |>
@@ -1886,7 +1933,7 @@ The weekly seasonal pattern interacts with the daily seasonal pattern, so the mo
 ::: callout-tip
 ## Interaction effects
 
-Combine interacting seasonalities and use colour (or facets) to separate the interactions (e.g. weekday and weekend effects).
+Combine interacting seasonalities, separated by colour or facets (e.g. weekdays and weekends).
 :::
 
 ::: {.fragment .fade-out fragment-index=1}
